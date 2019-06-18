@@ -1,5 +1,0 @@
-Host nest
-    HostName jwtauth.nestapp.yt
-    User 9073
-    UserKnownHostsFile /Volumes/Extra/Projects/JWTAuth/Server/.tree_key
-    IdentityFile /Volumes/Extra/Projects/JWTAuth/Server/.contact_key
