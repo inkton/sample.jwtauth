@@ -1,0 +1,40 @@
+
+1. The projects are stored in a single git archive. the individual projects are split into different git branches. 
+
+For example,
+  
+  app1-master
+  shared-master
+  worker1-master
+  worker3-master
+
+etc.    
+
+2. Add shared folders into shared and push to the repository.
+
+For example,
+
+  shared/Docs
+  shared/Utils
+
+Then include the code in the project file as follows.
+
+ <Project Sdk="Microsoft.NET.Sdk.Web">
+   <ItemGroup>
+       <Compile Include="../shared/Utils/**\*.cs" />
+   </ItemGroup>
+   <ItemGroup>
+       <ProjectReference Include="../shared/ToolsSet/ToolSet.csproj" />   
+   </ItemGroup>
+       ..
+ </Project>
+
+Make sure to commit and push to the repository before deployment.
+
+3. Database and git. The Database folder will have 2 files when the Database is downloaded.
+
+    - ddl.sql (SQL Schema)
+    - dml.sql (SQL Data)
+
+The SQL Data file is ignored by gitigore in the Database folder. Remove to store the data file in git.
+ 
