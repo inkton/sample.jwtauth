@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<local:JWTAuthPage xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             xmlns:local="clr-namespace:JWTAuthTest"                  
+             x:Class="JWTAuthTest.IndustryView"
+             Title="Share Price Check">
+    <ContentPage.Content>
+        
+        <FlexLayout Direction="Column" AlignItems="Center"
+                JustifyContent="SpaceEvenly">       
+                        
+            <StackLayout Orientation="Vertical" 
+                HorizontalOptions="Center"
+                VerticalOptions="StartAndExpand">
+                
+                <Label Text="Share Prices" x:Name="LabelEmail"                    
+                    HorizontalOptions="CenterAndExpand" />
+                
+                <Picker x:Name="Industries"
+                    Title="Industries"
+                    SelectedItem="{Binding SelectedIndustry, Mode=TwoWay}"
+                    ItemsSource="{Binding Industries}"
+                    ItemDisplayBinding="{Binding Name}" 
+                    HorizontalOptions="CenterAndExpand"   
+                    WidthRequest="120"/>               
+                
+                <ListView x:Name="ListViewShares"
+                    ItemsSource="{Binding Shares}"
+                    SelectedItem="{Binding SelectedShare, Mode=TwoWay}"
+                    HeightRequest="180" WidthRequest="250">   
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Grid>
+                                    <Label Text="{Binding Tag}" FontAttributes="Bold" />
+                                    <Label Grid.Column="1" Text="{Binding Shares}" />
+                                    <Label Grid.Column="2" Text="{Binding Price, StringFormat='$ {0:F2}'}}" />
+                                </Grid>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>                    
+                </ListView>                
+            </StackLayout>
+            
+            <StackLayout Orientation="Vertical">
+                <StackLayout Orientation="Horizontal" Margin="0, 10, 0, 0"
+                    HorizontalOptions="Center">
+                    <Button x:Name="ButtonAdd" Text="Add" WidthRequest="100" />
+                    <Button x:Name="ButtonUpdate" Text="Update"  WidthRequest="100" />
+                    <Button x:Name="ButtonDelete" Text="Delete"  WidthRequest="100" />                   
+                </StackLayout>                
+                <StackLayout Orientation="Horizontal" Margin="0, 0, 0, 0"
+                    HorizontalOptions="Center">
+                    <Button x:Name="ButtonLogout" Text="Logout" WidthRequest="100" />
+                    <Button x:Name="ButtonGetCached" Text="Cached Price"  WidthRequest="100" />
+                    <Button x:Name="ButtonGetCurrent" Text="Current Price"  WidthRequest="100" />                   
+                </StackLayout>                
+            </StackLayout>
+                            
+            <Label Text="{Binding Status}" FontSize="Small" LineBreakMode="WordWrap" 
+                   VerticalOptions="CenterAndExpand" />
+            
+        </FlexLayout>
+        
+    </ContentPage.Content>
+</local:JWTAuthPage>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<local:JWTAuthPage xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             xmlns:local="clr-namespace:JWTAuthTest"                               
+             x:Class="JWTAuthTest.ShareView">
+    <ContentPage.Content>
+        
+        <FlexLayout Direction="Column" AlignItems="Center"
+                JustifyContent="SpaceEvenly">       
+                        
+            <StackLayout Orientation="Vertical" 
+                HorizontalOptions="Center"
+                VerticalOptions="StartAndExpand">
+                
+                <Label Text="Share" x:Name="LabelEmail"                    
+                    HorizontalOptions="CenterAndExpand" />
+                
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Id" x:Name="LabelId" WidthRequest="75" VerticalOptions="CenterAndExpand" />
+                    <Entry x:Name="IdTag" WidthRequest="150" VerticalOptions="CenterAndExpand"
+                         IsReadOnly="true" Text="{Binding Path=SelectedShare.Id}" />                    
+                </StackLayout>
+                
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Tag" x:Name="LabelTag" WidthRequest="75" VerticalOptions="CenterAndExpand" />
+                    <Entry x:Name="EntryTag" WidthRequest="150" VerticalOptions="CenterAndExpand"
+                          Keyboard="Text" Text="{Binding Path=SelectedShare.Tag, Mode=TwoWay}" />                    
+                </StackLayout>
+                
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Price" x:Name="LabelPrices" WidthRequest="75" VerticalOptions="CenterAndExpand" />
+                    <Entry x:Name="EntryPrice" WidthRequest="150" VerticalOptions="CenterAndExpand"
+                          Keyboard="Numeric" Text="{Binding Path=SelectedShare.Price, Mode=TwoWay}" />
+                    
+                </StackLayout>
+                
+            </StackLayout>
+            
+            <StackLayout Orientation="Horizontal"
+                HorizontalOptions="Center">
+                <Button x:Name="ButtonOkay" Text="Okay" WidthRequest="100" />
+            </StackLayout>
+            
+            <Label Text="{Binding Status}" FontSize="Small" LineBreakMode="WordWrap" 
+                   VerticalOptions="CenterAndExpand" />
+            
+        </FlexLayout>
+        
+    </ContentPage.Content>
+</local:JWTAuthPage>

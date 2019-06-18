@@ -1,0 +1,54 @@
+#!/bin/bash
+# ------------------------------------------------------
+#	dotnet app
+#	(c) 2016 Inkton
+# 
+
+. $NEST_FOLDER_TREE/nest/twigs/base.twig
+. $NEST_FOLDER_TREE/nest/twigs/frameworks/dotnet.twig
+
+app_init() {
+	yell "<- app init  ->"
+}
+
+app_shutdown() {
+	yell "<- app shutdown  ->"
+}
+
+app_before_install() {
+	yell "-> app_before_install"; 
+}
+
+app_before_upgrade() {
+	yell "-> app_before_upgrade"; 
+} 
+
+app_before_start() {
+	yell "-> app_before_start"; 
+}
+
+app_before_daily() {
+	yell "-> app_before_daily"; 
+	
+	# called anytime between 0-1 HRS UTC
+
+	if [ $NEST_CUSHION_INDEX == 0 ]; then
+
+		# running aginst the master ensures
+		# the job is only run once. 
+		
+		if [[ $(date +%u) -eq 1 ]] ; then
+			yell "-> do weekly tasks "; 
+		fi
+		
+		if [[ $(date +%d) -eq 1  ]]; then
+			yell "-> do monthly tasks "; 
+		fi
+
+	fi
+}
+
+twig_links_begin
+	link_twigs base dotnet
+	link_twigs dotnet app
+twig_links_end

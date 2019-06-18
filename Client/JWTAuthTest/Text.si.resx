@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    
+    <!-- 
+        These are required for the NesterService
+    -->
+    
+    <data name="NEST_RESULT_HTTP_400" xml:space="preserve">
+        <value>නරක ඉල්ලීමක්</value>
+    </data>
+    <data name="NEST_RESULT_HTTP_401" xml:space="preserve">
+        <value>අවසර නොලත්</value>
+    </data>
+    <data name="NEST_RESULT_HTTP_403" xml:space="preserve">
+       <value>ප්‍රවේශය තහනම්</value>
+    </data>
+    <data name="NEST_RESULT_HTTP_ERROR" xml:space="preserve">
+        <value>HTTP දෝෂයකි</value>
+    </data>
+
+    <!-- 
+        App specific errors
+    -->
+    
+    <data name="Succeeded" xml:space="preserve">
+        <value>සාර්ථකයි</value>
+    </data>
+    <data name="Failed" xml:space="preserve">
+        <value>අසාර්ථක විය</value>
+    </data>
+    <data name="Unauthorized" xml:space="preserve">
+        <value>අනවසරයි</value>
+    </data>
+    <data name="InternalError" xml:space="preserve">
+        <value>අභ්‍යන්තර දෝෂයකි</value>
+    </data>
+    <data name="IncorrectEmail" xml:space="preserve">
+        <value>පරිශීලක හමු නොවිනි</value>
+    </data>
+    <data name="EmailNotConfirmed" xml:space="preserve">
+        <value>විද්‍යුත් තැපෑල තහවුරු කර නොමැත</value>
+    </data>
+    <data name="IncorrectSecurityCode" xml:space="preserve">
+        <value>වැරදි ආරක්ෂක කේතය</value>
+    </data>
+    <data name="InvalidPermit" xml:space="preserve">
+        <value>අවලංගු බලපත්‍රයක්</value>
+    </data>
+    <data name="InvalidShare" xml:space="preserve">
+        <value>වලංගු නොවන කොටස</value>
+    </data>
+    
+    <data name="LoginFailed" xml:space="preserve">
+        <value>ඇතුළු වීම අසාර්ථක විය</value>
+    </data>  
+    
+</root>

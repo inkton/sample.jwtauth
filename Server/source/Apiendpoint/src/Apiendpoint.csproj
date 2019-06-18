@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.2</TargetFramework>
+        <MvcRazorCompileOnPublish>true</MvcRazorCompileOnPublish>
+        <UserSecretsId>Jwtauth01bb9bf9-ef3c-4dc0-949d-dc3a7ffaa9bc</UserSecretsId>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include="../../shared/Database/**/*.cs" />
+        <Compile Include="../../shared/Model/**/*.cs" />
+        <Compile Include="../../shared/Services/**/*.cs" />
+        <Compile Include="../../shared/Extensions/**/*.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="wwwroot/" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../../shared/nester.works/Nester.Works/Nester.Works.csproj" /> 
+    </ItemGroup>    
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="3.1.2" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="3.0.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUi" Version="3.0.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="3.0.0"/>
+        <PackageReference Include="SendGrid" Version="9.10.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.2" />
+    </ItemGroup>
+</Project>
