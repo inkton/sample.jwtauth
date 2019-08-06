@@ -124,18 +124,14 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.0.0.482894" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.1.0" />
+    <PackageReference Include="Xamarin.Forms" Version="4.1.0.618606" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.2.0" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
     <ProjectReference Include="..\JWTAuthTest\JWTAuthTest.csproj">
       <Project>{9AD6A90F-0C03-45A8-888C-29E08FD93BC6}</Project>
       <Name>JWTAuthTest</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\..\Users\rajitha\Documents\inkton\github\nester.library\Nester.Library\Nester.Library.csproj">
-      <Project>{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}</Project>
-      <Name>Nester.Library</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

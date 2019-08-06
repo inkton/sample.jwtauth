@@ -3,17 +3,18 @@ using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.Threading.Tasks;
+using Jwtauth.Config;
 
 namespace Jwtauth.Services
 {
     public class EmailSender : IEmailSender
     {
-        public EmailSender(IOptions<SendGridOptions> optionsAccessor)
+        public EmailSender(IOptions<SendGridSettings> optionsAccessor)
         {
             Options = optionsAccessor.Value;
         }
 
-        public SendGridOptions Options { get; }  
+        public SendGridSettings Options { get; }  
 
         public Task SendEmailAsync(string email, string subject, string message)
         {

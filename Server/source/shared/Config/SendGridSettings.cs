@@ -1,6 +1,6 @@
-namespace Jwtauth.Services
+namespace Jwtauth.Config
 {
-    public class SendGridOptions
+    public class SendGridSettings
     {
         public string ApiKey { get; set; }
         public string Secret { get; set; }

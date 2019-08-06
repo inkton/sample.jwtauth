@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -21,26 +22,26 @@ using Inkton.Nest.Model;
 using Jwtauth.Database;
 using Jwtauth.Model;
 using Jwtauth.Services;
+using Jwtauth.Helpers;
 
 namespace Jwtauth.Controllers
 {
     [ApiController]
-    [Route("api/users")]
-    public class UsersController : Controller
+    [Route("api/traders")]
+    public class TradersController : Controller
     {
         private readonly ILogger _logger;
         private readonly IIndustryRepository _repo;        
-        private readonly SignInManager<User> _signInManager;
-        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<Trader> _signInManager;
+        private readonly UserManager<Trader> _userManager;
         private readonly IConfiguration _configuration;
         private readonly IEmailSender _emailSender;
 
-        public UsersController(
-            ILogger<UsersController> logger,
+        public TradersController(
+            ILogger<TradersController> logger,
             IIndustryRepository repo,
-            Runtime runtime,            
-            UserManager<User> userManager,
-            SignInManager<User> signInManager,
+            UserManager<Trader> userManager,
+            SignInManager<Trader> signInManager,
             IEmailSender emailSender,
             IConfiguration configuration
             )
@@ -54,8 +55,9 @@ namespace Jwtauth.Controllers
         }
         
         // GET api/users/{id}
+        [Authorize(Policy = "AllTraders")] 
         [HttpGet("{email}")]
-        public async Task<object> QueryAsync(string id)
+        public async Task<JsonResult> QueryAsync(string id)
         {
             try
             {
@@ -80,8 +82,11 @@ namespace Jwtauth.Controllers
         }
 
         // PUT api/users/{id}
+        [Authorize(Policy = "AllTraders")] 
         [HttpPut("{id}")]
-        public async Task<object> UpdateAsync(string id, [FromQuery] string password)
+        public async Task<JsonResult> UpdateAsync(string id, 
+            [FromQuery] string firstName,
+            [FromQuery] string lastName)
         {
             try
             {
@@ -92,9 +97,13 @@ namespace Jwtauth.Controllers
                     return this.NestResult(Result.Unauthorized); 
                 }
 
-                if (password != null)
+                if (firstName != null)
                 {
-                    user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, password);
+                    user.FirstName = firstName;
+                }
+                if (lastName != null)
+                {
+                    user.LastName = lastName;
                 }
 
                 var result = await _userManager.UpdateAsync(user);
@@ -117,79 +126,21 @@ namespace Jwtauth.Controllers
             }
         }
 
-        [HttpPost("{id}/roles/{role}")]
-        public async Task<object> AddUserRoleAsync(string id, string role)
+        private async Task<Trader> GetUserAsync(string id)
         {
-            try
-            {
-                var user = await GetUserAsync(id);
-
-                if (user == null)
-                {
-                    return this.NestResult(Result.Unauthorized); 
-                }
-
-                if (!await _userManager.IsInRoleAsync(user, role))
-                {
-                    var result = await _userManager.AddToRoleAsync(user, role);
- 
-                    if (!result.Succeeded)
-                    {
-                        return this.NestResult(Result.Failed,
-                            JsonConvert.SerializeObject(result.Errors));
-                    }
-                }
-
-                return this.NestResult(Result.Succeeded);
-            }
-            catch (System.Exception e)
-            {
-                return this.NestResult(Result.InternalError,
-                    e.Message);
-            }
-        }
-
-        [HttpDelete("{id}/roles/{role}")]
-        public async Task<object> RemoveUserRoleAsync(string id, string role)
-        {
-            try
-            {
-                var user = await GetUserAsync(id);
-
-                if (user == null)
-                {
-                    return this.NestResult(Result.Unauthorized); 
-                }
-
-                if (await _userManager.IsInRoleAsync(user, role))
-                {
-                    var result = await _userManager.RemoveFromRoleAsync(user, role);
- 
-                    if (!result.Succeeded)
-                    {
-                        return this.NestResult(Result.Failed,
-                            JsonConvert.SerializeObject(result.Errors));
-                    }
-                }
-
-                return this.NestResult(Result.Succeeded);
-            }
-            catch (System.Exception e)
-            {
-                return this.NestResult(Result.InternalError,
-                    e.Message);
-            }
-        }
-
-        private async Task<User> GetUserAsync(string id)
-        {
-            User user = await _userManager.GetUserAsync(HttpContext.User);
+            Trader user = await _userManager.GetUserAsync(HttpContext.User);
 
             if (id != user.Id.ToString())
             {
-                if (!await _userManager.IsInRoleAsync(user, "Admin"))
+                var claims = await _userManager.GetClaimsAsync(user);
+                var dateJoinedRaw = claims.Where(c => c.Type == "jwt.datej")
+                            .Select(c => c.Value).Single();
+                if (dateJoinedRaw == null)
+                    return null; 
+                var dateJoined = DateTime.Parse(dateJoinedRaw);
+                if ( (DateTime.Now - dateJoined).TotalDays > (365 * 5))
                 {
-                    // only admin can change other users
+                    // only experienced traders can change other users
                     return null; 
                 }
 

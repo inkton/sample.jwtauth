@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Xamarin.Forms;
 using Inkton.Nester.Cloud;
+using System.Threading;
 
 namespace JWTAuthTest
 {
-    public partial class IndustryView : JWTAuthPage
+    public partial class DashboardPage : JWTAuthPage
     {
-        public IndustryView(IndustryViewModel viewModel)
-            : base(viewModel)
+        public DashboardPage()
         {
             InitializeComponent();
 
@@ -29,6 +29,7 @@ namespace JWTAuthTest
             ButtonUpdate.Clicked += ButtonUpdate_ClickedAsync;
             ButtonDelete.Clicked += ButtonDelete_ClickedAsync;
             ButtonLogout.Clicked += ButtonLogout_ClickedAsync;
+            ButtonQuit.Clicked += ButtonQuit_Clicked;
         }
 
         async void Industries_SelectedIndexChangedAsync(object sender, EventArgs e)
@@ -77,8 +78,10 @@ namespace JWTAuthTest
         {
             try
             {
-                await Navigation.PushAsync(
-                    new ShareView(_viewModel, true));
+                SharePage sharePage = new SharePage();
+                sharePage.ViewModel = _viewModel;
+
+                await Navigation.PushAsync(sharePage);
             }
             catch (Exception ex)
             {
@@ -90,8 +93,10 @@ namespace JWTAuthTest
         {
             try
             {
-                await Navigation.PushAsync(
-                    new ShareView(_viewModel, false));
+                SharePage sharePage = new SharePage();
+                sharePage.ViewModel = _viewModel;
+
+                await Navigation.PushAsync(sharePage);
             }
             catch (Exception ex)
             {
@@ -115,6 +120,11 @@ namespace JWTAuthTest
         async void ButtonLogout_ClickedAsync(object sender, EventArgs e)
         {
             await Navigation.PopAsync();
+        }
+
+        private void ButtonQuit_Clicked(object sender, EventArgs e)
+        {
+            Thread.CurrentThread.Abort();
         }
     }
 }

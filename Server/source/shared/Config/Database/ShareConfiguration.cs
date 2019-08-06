@@ -6,7 +6,7 @@ using Inkton.Nester;
 using Jwtauth;
 using Jwtauth.Model;
 
-namespace Jwtauth.Database
+namespace Jwtauth.Config.Database
 {
     public class ShareConfiguration : IEntityTypeConfiguration<Share>
     {
