@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using Xamarin.Forms;
-using Inkton.Nester.Cloud;
+using Inkton.Nest.Cloud;
+using Jwtauth.Model;
 
 namespace JWTAuthTest
 {
@@ -10,48 +11,36 @@ namespace JWTAuthTest
     // by visiting https://aka.ms/xamarinforms-previewer
     [DesignTimeVisible(true)]
     public partial class MainPage : JWTAuthPage
-    {   
-        public MainPage(NesterService backend)
-            :base(new IndustryViewModel(backend))
+    {
+        public MainPage()
         {
             InitializeComponent();
 
             _busyBundle = new ControlBundle(
                 new List<VisualElement> { 
-                    EntryEmail, EntryPassword, ButtonLogin, 
+                    EntryEmail, ButtonLogin, 
                     ButtonRegister, ButtonResetPassword });
 
             ButtonLogin.Clicked += ButtonLogin_ClickedAsync;
             ButtonRegister.Clicked += ButtonRegister_ClickedAsync;
+            ButtonResetPassword.Clicked += ButtonResetPassword_ClickedAsync;
         }
 
         async void ButtonLogin_ClickedAsync(object sender, EventArgs e)
         {
             try
             {
-                if (_viewModel.IsLoginValid())
+                if (_viewModel.IsEmailValid())
                 {
-                    var result = await _viewModel.QueryTokenAsync();
+                    LoginPage loginPage = new LoginPage();
 
-                    if (result.Code == 0)
-                    {
-                        _viewModel.Status = "Logged in, getting the industries ...";
-
-                        await _viewModel.QueryIndustriesAsync();
-
-                        await Navigation.PushAsync(
-                            new IndustryView(_viewModel));
-                    }
-                    else
-                    {
-                        _viewModel.Status = "Failed";
-
-                        ShowAlert(result);
-                    }
+                    _viewModel.MakePassword = false;
+                    loginPage.ViewModel = _viewModel;
+                    await Navigation.PushAsync(loginPage);
                 }
                 else
                 {
-                    ShowAlert("Please enter an email and password");
+                    ShowAlert("Please enter an email address");
                 }
             }
             catch (Exception ex)
@@ -64,23 +53,45 @@ namespace JWTAuthTest
         {
             try
             {
-                if (_viewModel.IsLoginValid())
+                if (_viewModel.IsEmailValid())
                 {
-                    var result = await _viewModel.SignupUserAsync();
+                    RegisterPage regPage = new RegisterPage();
 
-                    if (result.Code == 0)
-                    {
-                        await Navigation.PushAsync(
-                            new ConfirmUser(_viewModel));
-                    }
-                    else
-                    {
-                        ShowAlert(result);
-                    }
+                    _viewModel.MakePassword = true;
+                    _viewModel.Backend.Permit.User.DateJoined = DateTime.Now;
+                    regPage.ViewModel = _viewModel;
+
+                    await Navigation.PushAsync(regPage);
                 }
                 else
                 {
-                    ShowAlert("Please enter an email and password");
+                    ShowAlert("Please enter an email address");
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowAlert(ex);
+            }
+        }
+
+        async void ButtonResetPassword_ClickedAsync(object sender, EventArgs e)
+        {
+            try
+            {
+                if (_viewModel.IsEmailValid())
+                {
+                    await _viewModel.AuthViewModel
+                        .RequestEmailConfirmationAsync();
+
+                    _viewModel.MakePassword = true;
+
+                    ConfirmUserPage confPage = new ConfirmUserPage();
+                    confPage.ViewModel = _viewModel;
+                    await Navigation.PushAsync(confPage);
+                }
+                else
+                {
+                    ShowAlert("Please enter an email address");
                 }
             }
             catch (Exception ex)

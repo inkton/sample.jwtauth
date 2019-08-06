@@ -11,8 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.0.0.482894" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.1.0" />
+    <PackageReference Include="Xamarin.Forms" Version="4.1.0.618606" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.2.0" />
+    <PackageReference Include="Inkton.NesterLibrary" Version="1.5.4" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Altert.cs" />
@@ -31,14 +32,13 @@
     <Compile Include="..\..\Server\source\shared\Model\Share.cs">
       <Link>Model\Share.cs</Link>
     </Compile>
+    <Compile Include="..\..\Server\source\shared\Model\Trader.cs">
+      <Link>Model\Trader.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Text.Designer.cs">
       <DependentUpon>Text.resx</DependentUpon>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\Users\rajitha\Documents\inkton\github\nester.library\Nester.Library\Nester.Library.csproj" />
-    <ProjectReference Include="..\..\Server\source\shared\nest.model\Nest.Model\Nest.Model.csproj" />
   </ItemGroup>
 </Project>

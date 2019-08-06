@@ -2,7 +2,7 @@
 <local:JWTAuthPage xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
              xmlns:local="clr-namespace:JWTAuthTest"                  
-             x:Class="JWTAuthTest.IndustryView"
+             x:Class="JWTAuthTest.DashboardPage"
              Title="Share Price Check">
     <ContentPage.Content>
         
@@ -42,8 +42,8 @@
                 </ListView>                
             </StackLayout>
             
-            <StackLayout Orientation="Vertical">
-                <StackLayout Orientation="Horizontal" Margin="0, 10, 0, 0"
+            <StackLayout Orientation="Vertical" Margin="0, 10, 0, 0">
+                <StackLayout Orientation="Horizontal" Margin="0, 0, 0, 0"
                     HorizontalOptions="Center">
                     <Button x:Name="ButtonAdd" Text="Add" WidthRequest="100" />
                     <Button x:Name="ButtonUpdate" Text="Update"  WidthRequest="100" />
@@ -53,8 +53,12 @@
                     HorizontalOptions="Center">
                     <Button x:Name="ButtonLogout" Text="Logout" WidthRequest="100" />
                     <Button x:Name="ButtonGetCached" Text="Cached Price"  WidthRequest="100" />
-                    <Button x:Name="ButtonGetCurrent" Text="Current Price"  WidthRequest="100" />                   
-                </StackLayout>                
+                    <Button x:Name="ButtonGetCurrent" Text="Current Price"  WidthRequest="100" />               
+                </StackLayout>
+                <StackLayout Orientation="Horizontal" Margin="0, 0, 0, 0"
+                    HorizontalOptions="Center">
+                    <Button x:Name="ButtonQuit" Text="Quit" WidthRequest="100" />
+                </StackLayout>                                
             </StackLayout>
                             
             <Label Text="{Binding Status}" FontSize="Small" LineBreakMode="WordWrap" 

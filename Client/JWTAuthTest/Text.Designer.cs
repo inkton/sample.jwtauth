@@ -95,6 +95,12 @@ namespace JWTAuthTest {
             }
         }
         
+        internal static string UserNotFound {
+            get {
+                return ResourceManager.GetString("UserNotFound", resourceCulture);
+            }
+        }
+        
         internal static string IncorrectEmail {
             get {
                 return ResourceManager.GetString("IncorrectEmail", resourceCulture);
@@ -128,6 +134,12 @@ namespace JWTAuthTest {
         internal static string LoginFailed {
             get {
                 return ResourceManager.GetString("LoginFailed", resourceCulture);
+            }
+        }
+        
+        internal static string PasswordRequired {
+            get {
+                return ResourceManager.GetString("PasswordRequired", resourceCulture);
             }
         }
     }

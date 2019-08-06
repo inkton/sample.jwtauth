@@ -12,33 +12,38 @@ using Inkton.Nest.Model;
 using Inkton.Nester.Cloud;
 using Inkton.Nester.ViewModels;
 using Jwtauth.Model;
+using Newtonsoft.Json;
 
 namespace JWTAuthTest
 {
-    public class IndustryViewModel : ViewModel
+    public class IndustryViewModel : ViewModel<Trader>
     {
-        private AuthViewModel _authViewModel;
+        private AuthViewModel<Trader> _authViewModel;
 
         private Industry _selectedIndustry;
         private ObservableCollection<Industry> _industries;
 
         private Share _selectedShare;
         private ObservableCollection<Share> _shares;
+        
+        private string _securityCode;
+        private string _password, _passwordConfirm;
+        private bool _makePassword;
 
         private int _attempt;
         private DateTime _attemptStarted;
         private string _status;
 
-        public IndustryViewModel(NesterService backend)
+        public IndustryViewModel(BackendService<Trader> backend)
             : base(backend)
         {
-            _authViewModel = new AuthViewModel(backend);
+            _authViewModel = new AuthViewModel<Trader>(backend);
 
             _industries = new ObservableCollection<Industry>();            
             _shares = new ObservableCollection<Share>();
         }
 
-        public AuthViewModel AuthViewModel
+        public AuthViewModel<Trader> AuthViewModel
         {
             get
             {
@@ -68,6 +73,30 @@ namespace JWTAuthTest
         {
             get { return _shares; }
             set { SetProperty(ref _shares, value); }
+        }
+
+        public string SecurityCode
+        {
+            get { return _securityCode; }
+            set { SetProperty(ref _securityCode, value); }
+        }        
+
+        public string Password
+        {
+            get { return _password; }
+            set { SetProperty(ref _password, value); }
+        }
+
+        public string PasswordConfirm
+        {
+            get { return _passwordConfirm; }
+            set { SetProperty(ref _passwordConfirm, value); }
+        }
+
+        public bool MakePassword
+        {
+            get { return _makePassword; }
+            set { SetProperty(ref _makePassword, value); }
         }
 
         public string Status
@@ -101,24 +130,73 @@ namespace JWTAuthTest
             Status = $"Completed in {ms} ms";
         }
 
-        public bool IsLoginValid(bool requirePassword = true)
+        async public Task SavePermitAsync()
         {
-            if (string.IsNullOrEmpty(_authViewModel.Platform.Permit.Owner.Email))
+            Application.Current.Properties["Permit"] = JsonConvert.SerializeObject(
+                Backend.Permit);
+            await Application.Current.SavePropertiesAsync();
+        }
+
+        async public Task<bool> RestorePermitAsync()
+        {
+            bool restored = false;
+            Status = "Please wait ...";
+            if (Application.Current.Properties.ContainsKey("Permit"))
             {
-                return false;
+                _backend.Permit = JsonConvert.DeserializeObject<Permit<Trader>>(
+                    Application.Current.Properties["Permit"] as string);
+                restored = (await Backend.RenewAccessAsync()).Code == 0;
+                if (restored)
+                    await QueryIndustriesAsync();
             }
-            if (requirePassword && string.IsNullOrEmpty(_authViewModel.Platform.Permit.Password))
+            return restored;
+        }
+
+
+        public bool IsEmailValid()
+        {
+            if (string.IsNullOrEmpty(_authViewModel.Backend.Permit.User.Email))
             {
                 return false;
             }
 
             // For this application the email, nickname and username 
             // all refer to the same login key
-            Platform.Permit.Owner.Nickname = Platform.Permit.Owner.Email;
+            Backend.Permit.User.Nickname = Backend.Permit.User.Email;
             return true;
         }
 
-        public bool IsShareholdingValid()
+        public bool IsSecurtyCodeValid()
+        {
+            return string.IsNullOrEmpty(_securityCode) &&
+                _securityCode.Length > 0;
+        }
+
+        public bool IsRegistrationValid()
+        {
+            if (Backend.Permit.User.DateJoined >= DateTime.Now)
+            {
+                return false;
+            }
+
+            return !(string.IsNullOrEmpty(Backend.Permit.User.FirstName) ||
+                string.IsNullOrEmpty(Backend.Permit.User.LastName) );
+        }
+
+        public bool IsPasswordValid()
+        {
+            bool valid = (_password.Length > 0);
+
+            if (_makePassword)
+            {
+                return valid &&
+                    _password == _passwordConfirm;
+            }
+
+            return valid;
+        }
+
+        public bool IsTheShareValid()
         {
             if (string.IsNullOrEmpty(_selectedShare.Tag))
             {
@@ -133,40 +211,6 @@ namespace JWTAuthTest
             return true;
         }
 
-        public async Task<ResultSingle<Permit>> SignupUserAsync(int Id = 0)
-        {
-            Debug.Assert(!string.IsNullOrWhiteSpace(Platform.Permit.Owner.Email));
-            Debug.Assert(!string.IsNullOrWhiteSpace(Platform.Permit.Password));
-
-            // Allow the platform to allocate the user id
-            _authViewModel.Platform.Permit.Owner.Id = Id;
-            _authViewModel.Platform.Permit.SecurityCode = string.Empty;
-
-            // The username is the email address
-            Platform.Permit.Owner.UserName = Platform.Permit.Owner.Email;
-
-            return await _authViewModel.SignupAsync(false);
-        }
-
-        public async Task<ResultSingle<Permit>> ConfirmUserAsync()
-        {
-            Debug.Assert(!string.IsNullOrWhiteSpace(Platform.Permit.Owner.Email));
-            Debug.Assert(!string.IsNullOrWhiteSpace(Platform.Permit.Password));
-
-            // The emailed security code must be available
-            Debug.Assert(!string.IsNullOrWhiteSpace(Platform.Permit.SecurityCode));
-
-            return await _authViewModel.SignupAsync(false);
-        }
-
-        public async Task<ResultSingle<Permit>> QueryTokenAsync()
-        {
-            Debug.Assert(!string.IsNullOrWhiteSpace(Platform.Permit.Owner.Email));
-            Debug.Assert(!string.IsNullOrWhiteSpace(Platform.Permit.Password));
-
-            return await _authViewModel.QueryTokenAsync(false);
-        }
-
         public async Task<ResultMultiple<Industry>> QueryIndustriesAsync(
             bool doCache = true, bool throwIfError = true)
         {
@@ -174,8 +218,9 @@ namespace JWTAuthTest
 
             Industry industrySeed = new Industry();
 
-            ResultMultiple<Industry> result = await ResultMultipleUI<Industry>.WaitForObjectAsync(
-                Platform, throwIfError, industrySeed, doCache);
+            ResultMultiple<Industry> result = await ResultMultipleUI<Industry>.WaitForObjectsAsync(
+                true, industrySeed, new CachedHttpRequest<Industry, ResultMultiple<Industry>>(
+                    Backend.QueryAsyncListAsync), true);
 
             if (result.Code >= 0)
             {
@@ -197,8 +242,9 @@ namespace JWTAuthTest
             Share shareSeed = new Share();
             shareSeed.OwnedBy = _selectedIndustry;
 
-            ResultMultiple<Share> result = await ResultMultipleUI<Share>.WaitForObjectAsync(
-                Platform, throwIfError, shareSeed, doCache);
+            ResultMultiple<Share> result = await ResultMultipleUI<Share>.WaitForObjectsAsync(
+                true, shareSeed, new CachedHttpRequest<Share, ResultMultiple<Share>>(
+                    Backend.QueryAsyncListAsync), true);
 
             if (result.Code >= 0)
             {
@@ -216,7 +262,7 @@ namespace JWTAuthTest
 
             ResultSingle<Share> result = await ResultSingleUI<Share>.WaitForObjectAsync(
                 throwIfError, SelectedShare, new CachedHttpRequest<Share, ResultSingle<Share>>(
-                    Platform.QueryAsync), doCache);
+                    Backend.QueryAsync), doCache);
                     
             if (result.Code >= 0)
             {
@@ -231,7 +277,7 @@ namespace JWTAuthTest
         {
             ResultSingle<Share> result = await ResultSingleUI<Share>.WaitForObjectAsync(
                 throwIfError, _selectedShare, new CachedHttpRequest<Share, ResultSingle<Share>>(
-                    Platform.CreateAsync), doCache);
+                    Backend.CreateAsync), doCache);
 
             if (result.Code >= 0)
             {
@@ -246,7 +292,7 @@ namespace JWTAuthTest
         {
             ResultSingle<Share> result = await ResultSingleUI<Share>.WaitForObjectAsync(
                 throwIfError, _selectedShare, new CachedHttpRequest<Share, ResultSingle<Share>>(
-                    Platform.UpdateAsync), doCache);
+                    Backend.UpdateAsync), doCache);
 
             if (result.Code >= 0)
             {
@@ -261,7 +307,7 @@ namespace JWTAuthTest
         {
             ResultSingle<Share> result = await ResultSingleUI<Share>.WaitForObjectAsync(
                 throwIfError, _selectedShare, new CachedHttpRequest<Share, ResultSingle<Share>>(
-                    Platform.RemoveAsync), doCache);
+                    Backend.RemoveAsync), doCache);
                     
             return result;
         }

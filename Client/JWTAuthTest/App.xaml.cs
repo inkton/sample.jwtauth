@@ -5,21 +5,19 @@ using System.Reflection;
 using Xamarin.Forms;
 using Xamarin.Essentials;
 using Newtonsoft.Json;
-using Inkton.Nest.Model;
+using Inkton.Nest.Cloud;
+using Jwtauth.Model;
 using Inkton.Nester;
-using Inkton.Nester.Cloud;
-using Inkton.Nester.Helpers;
-using Inkton.Nester.Storage;
-using Inkton.Nester.ViewModels;
+using Inkton.Nest.Model;
 
 namespace JWTAuthTest
 {
     public partial class App : Application, INesterClient
     {
-        private NesterService _backend;
+        private BackendService<Trader> _backend;
 
         private const string ProductionEndpoint = "https://jwtauth.nestapp.yt/api/";
-        private const string DevelopmentEndpoint = "http://127.0.0.1:32774/api/";
+        private const string DevelopmentEndpoint = "http://127.0.0.1:32773/api/";
 
         private const int ApiVersion = 1;
 
@@ -45,21 +43,16 @@ namespace JWTAuthTest
                 ApiVersion: ApiVersion
             ));
 
-            _backend = new NesterService(
-                ApiVersion, clientSignature,
-                new StorageService(Path.Combine(
-                    Path.GetTempPath(), "JWTAuthCache")));
-
+            _backend = new BackendService<Trader>();
+            _backend.Version = ApiVersion;
+            _backend.DeviceSignature = clientSignature;
             _backend.Endpoint = DevelopmentEndpoint;
             _backend.AutoTokenRenew = true;
 
-            MainPage = new NavigationPage(new MainPage(_backend));
-        }
+            SplashPage splash = new SplashPage();
+            splash.ViewModel = new IndustryViewModel(_backend);
 
-        public User User
-        {
-            get { return _backend.Permit.Owner; }
-            set { _backend.Permit.Owner = value; }
+            MainPage = new NavigationPage(splash);
         }
 
         public ResourceManager GetResourceManager()

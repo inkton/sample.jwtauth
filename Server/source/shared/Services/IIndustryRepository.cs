@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Jwtauth.Model;
 
-namespace Jwtauth.Database
+namespace Jwtauth.Services
 {    
     public interface IIndustryRepository
     {        

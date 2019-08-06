@@ -1,29 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authorization;
+//using System.Collections.Generic;
+//using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Builder;
+//using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+//using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.Filters;
 using Inkton.Nest.Model;
 using Inkton.Nester;
 using Jwtauth.Database;
 using Jwtauth.Model;
+using Jwtauth.Helpers;
 using Jwtauth.Services;
+using Jwtauth.Config;
+using Jwtauth.Extensions;
 
 namespace Jwtauth
 {   
@@ -40,82 +53,43 @@ namespace Jwtauth
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddNester();
-
-            // 1. Set API Version
-
             services.AddDbContext<JwtauthContext>(options =>
                 options.UseSqlite("Data Source=/var/app/source/shared/Jwtauth.db"));
-            services.AddScoped<IIndustryRepository, IndustryRepository>();
+            services.AddScoped<IIndustryRepository, IndustryRepository>();            
+
+            // Set API Version
             services.AddApiVersioning(options => {
                 options.ReportApiVersions = true;
                 options.AssumeDefaultVersionWhenUnspecified = true;
                 options.DefaultApiVersion = new ApiVersion(1,0);
                 options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
                 });
-            services.AddSwaggerGen(options => {
-               options.SwaggerDoc("v1", new Info { Title = "Demo Jwt Auth API", Version = "v1" });
+
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo  { Title = "Demo Jwt Auth API", Version = "v1" });
+                options.OperationFilter<AppendAuthorizeToSummaryOperationFilter>(); // Adds "(Auth)" to the summary so that you can see which endpoints have Authorization
+                // or use the generic method, e.g. c.OperationFilter<AppendAuthorizeToSummaryOperationFilter<MyCustomAttribute>>();
+
+                // add Security information to each operation for OAuth2
+                options.OperationFilter<SecurityRequirementsOperationFilter>();
+                // or use the generic method, e.g. c.OperationFilter<SecurityRequirementsOperationFilter<MyCustomAttribute>>();
+
+                // if you're using the SecurityRequirementsOperationFilter, you also need to tell Swashbuckle you're using OAuth2
+                options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                {
+                    Description = "Standard Authorization header using the Bearer scheme. Example: \"bearer {token}\"",
+                    In = ParameterLocation.Header,
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
+                });                
             });
 
-            // 2. Configure JWT Authentication
+            // Add Identity and JWT (Note sequence important)
 
-            services.AddAuthentication(options => {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options => {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters {
-                    ValidIssuer = Configuration["JwtIssuer"],
-                    ValidAudience = Configuration["JwtIssuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtKey"])),
-                    ClockSkew = TimeSpan.Zero // remove delay of token when expire
-                };
-            });
-
-            // 3. Configure .Net Core Identity
-
-            services.AddIdentity<User, Role>(options => {
-                // Password settings.
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
-
-                // Lockout settings.
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
-
-                // User settings.
-                options.User.AllowedUserNameCharacters =
-                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.User.RequireUniqueEmail = true;
-
-                // Set emailed token for both
-                options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
-                options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;                
-            })
-            .AddEntityFrameworkStores<JwtauthContext>()
-            .AddDefaultTokenProviders();
-
-            services.AddMvc(options => {
-                var policy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
-                options.Filters.Add(new AuthorizeFilter(policy));
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-            services.AddAuthorization(options => {
-                options.AddPolicy("AllAllowed", policy => policy.RequireRole("User", "Admin"));
-                options.AddPolicy("OnlyAdminsAllowed", policy => policy.RequireRole("Admin"));
-            });
-
-            // 4. Configure Email for sending out security codes
-
-            services.AddTransient<IEmailSender, EmailSender>();
-            services.Configure<SendGridOptions>(Configuration.GetSection("SendGrid"));
+            services.AddIdentity(Configuration);
+            services.AddJwt(Configuration);
         }
 
         // This method gets called by the runtime. 
