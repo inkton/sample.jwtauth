@@ -6,19 +6,13 @@ using Inkton.Nester.Cloud;
 
 namespace JWTAuthTest
 {
-    public partial class ShareView : JWTAuthPage
+    public partial class SharePage : JWTAuthPage
     {
         private bool _addingRecord;
 
-        public ShareView(IndustryViewModel viewModel, bool addingRecord = true)
-            :base(viewModel)
+        public SharePage()
         {
             InitializeComponent();
-
-            _addingRecord = addingRecord;
-
-            if (addingRecord)
-                _viewModel.SelectedShare = new Jwtauth.Model.Share();
                 
             _busyBundle = new ControlBundle(
                 new List<VisualElement> {
@@ -27,11 +21,23 @@ namespace JWTAuthTest
             ButtonOkay.Clicked += ButtonOkay_ClickedAsync;
         }
 
+        public bool AddingRecord
+        {
+            get { return _addingRecord; }
+            set
+            {
+                _addingRecord = value;
+
+                if (_addingRecord)
+                    _viewModel.SelectedShare = new Jwtauth.Model.Share();
+            }
+        }
+
         async void ButtonOkay_ClickedAsync(object sender, EventArgs e)
         {
             try
             {
-                if (!_viewModel.IsShareholdingValid())
+                if (!_viewModel.IsTheShareValid())
                 {
                     ShowAlert("Please enter a valid company share");
                 }

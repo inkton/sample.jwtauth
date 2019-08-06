@@ -1,5 +1,4 @@
-
-namespace Jwtauth.Services
+namespace Jwtauth.Helpers
 {
     public enum Result
     {
@@ -13,6 +12,7 @@ namespace Jwtauth.Services
         IncorrectSecurityCode = -30,
         InvalidPermit = -35,
         InvalidShare = -40,
-        LoginFailed = -45
+        LoginFailed = -45,
+        PasswordRequired = -50
     }
 }

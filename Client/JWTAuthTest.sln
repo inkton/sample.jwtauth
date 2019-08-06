@@ -7,10 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JWTAuthTest.iOS", "JWTAuthT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JWTAuthTest", "JWTAuthTest\JWTAuthTest.csproj", "{9AD6A90F-0C03-45A8-888C-29E08FD93BC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nester.Library", "..\..\..\..\..\Users\rajitha\Documents\inkton\github\nester.library\Nester.Library\Nester.Library.csproj", "{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nest.Model", "..\Server\source\shared\nest.model\Nest.Model\Nest.Model.csproj", "{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,29 +53,5 @@ Global
 		{9AD6A90F-0C03-45A8-888C-29E08FD93BC6}.Debug|iPhone.Build.0 = Debug|Any CPU
 		{9AD6A90F-0C03-45A8-888C-29E08FD93BC6}.Release|iPhone.ActiveCfg = Release|Any CPU
 		{9AD6A90F-0C03-45A8-888C-29E08FD93BC6}.Release|iPhone.Build.0 = Release|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Debug|iPhone.Build.0 = Debug|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{2FE56B33-C633-4C02-AE04-C9EE1D2AFA82}.Release|iPhone.Build.0 = Release|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Debug|iPhone.Build.0 = Debug|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{071D46D7-7FC3-4585-9D70-2CAB4ED087CB}.Release|iPhone.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

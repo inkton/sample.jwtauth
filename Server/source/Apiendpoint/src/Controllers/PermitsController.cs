@@ -6,13 +6,16 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Inkton.Nester;
@@ -22,62 +25,79 @@ using Inkton.Nest.Model;
 using Jwtauth.Database;
 using Jwtauth.Model;
 using Jwtauth.Services;
+using Jwtauth.Helpers;
 
 namespace Jwtauth.Controllers
 {
     [ApiController]
-    [AllowAnonymous]
     [Route("api/permits")]
     public class PermitsController : Controller
     {
         private readonly ILogger _logger;
-        private readonly IIndustryRepository _repo;        
-        private readonly SignInManager<User> _signInManager;
-        private readonly UserManager<User> _userManager;
-        private readonly RoleManager<Role> _roleManager;
-        private readonly IConfiguration _configuration;
+        private readonly IIndustryRepository _repo;
+        private readonly SignInManager<Trader> _signInManager;
+        private readonly UserManager<Trader> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly IJwtFactory _jwtFactory;
 
         public PermitsController(
             ILogger<PermitsController> logger,
-            IIndustryRepository repo,
-            Runtime runtime,            
-            UserManager<User> userManager,
-            RoleManager<Role> roleManager,
-            SignInManager<User> signInManager,
+            IIndustryRepository repo,            
+            SignInManager<Trader> signInManager,
+            UserManager<Trader> userManager,
             IEmailSender emailSender,
-            IConfiguration configuration
+            IJwtFactory jwtFactory
             )
         {
             _logger = logger;
-            _repo = repo;            
-            _userManager = userManager;
-            _roleManager = roleManager;
+            _repo = repo;           
             _signInManager = signInManager;
-            _emailSender = emailSender;           
-            _configuration = configuration;
+            _userManager = userManager;
+            _emailSender = emailSender;
+            _jwtFactory = jwtFactory;  
         }
         
+        [AllowAnonymous]
         [HttpPost]
-        public async Task<object> RegisterAsync(Permit permit)
+        public async Task<JsonResult> RegisterAsync(Permit<Trader> permit, [FromQuery] string password)
         {
             try
             {
-                // The user is registered in 2 steps. The fist
-                // step is when the email and password is provided.
-                // An email is sent to the email address to confirm.
-                // The user then completes the registration with 
-                // the security code sent in the email.
+                if (string.IsNullOrWhiteSpace(permit.User.Email))
+                    return this.NestResult(Result.IncorrectEmail);
+                if (string.IsNullOrWhiteSpace(password))
+                    return this.NestResult(Result.PasswordRequired);
 
-                if (String.IsNullOrEmpty(permit.SecurityCode))
+                // create user and confirm email via a security code
+                Trader newTrader = new Trader();
+                newTrader.FirstName = permit.User.FirstName;
+                newTrader.LastName = permit.User.LastName;
+                newTrader.Email = permit.User.Email;
+                newTrader.UserName = permit.User.UserName;
+                newTrader.DateJoined = permit.User.DateJoined;
+
+                var result = await _userManager.CreateAsync(newTrader, password);
+
+                if (result.Succeeded)
                 {
-                    // Step 1 : user onboarding
-                    return await CreateUserAsync(permit);
+                    await _userManager.AddClaimAsync(newTrader,
+                        new Claim("jwt.datej", newTrader.DateJoined.ToString()));
+
+                    _logger.LogInformation("User created a new account with password.");
+
+                    await RequestEmailConfirmationAsync(newTrader);
+
+                    // Copy the database assigned id
+                    permit.User.Id = newTrader.Id;
+
+                    // Update the user and return                        
+                    return this.NestResultSingle(
+                        Result.Succeeded, permit); 
                 }
                 else
                 {
-                    // Step 2 : confirm the user details
-                    return await ConfirmUserAsync(permit);
+                    return this.NestResult(Result.Failed,
+                        JsonConvert.SerializeObject(result.Errors));                                  
                 }
             }
             catch (System.Exception e)
@@ -87,172 +107,197 @@ namespace Jwtauth.Controllers
             }
         }
 
-        // GET api/permits/{email}
-        [HttpGet("{email}")]
-        public async Task<object> QueryTokenAsync(string email, [FromQuery] string password)
-        {
-            if (string.IsNullOrEmpty(email))
-            {
-                return this.NestResult(Result.IncorrectEmail); 
-            }
-            
-            var result = await _signInManager.PasswordSignInAsync(email, password, false, false);
-            
-            if (result.Succeeded)
-            {
-                Permit permit = new Permit();
-                permit.Password = password;
-                permit.Owner = await _userManager.FindByNameAsync(email);
-                permit.Token = await GenerateJwtTokenAsync(permit.Owner);
-
-                return this.NestResultSingle(
-                    Result.Succeeded, permit, "A new token has been created for the permit");
-            }
-
-            return this.NestResult(Result.LoginFailed);
-        }
-
         // PUT api/permits/{email}
+        [AllowAnonymous]
         [HttpPut("{email}")]
-        public async Task<object> ResetPasswordAsync(string email)
+        public async Task<JsonResult> SetupPermitAsync(string email,
+            Permit<Trader> permit,
+            [FromQuery] string action, 
+            [FromQuery] string securityCode,
+            [FromQuery] string password            
+            )
         {
             if (string.IsNullOrEmpty(email))
-            {
                 return this.NestResult(Result.IncorrectEmail); 
-            }
-            
+            if (string.IsNullOrEmpty(action))
+                return this.NestResult(Result.Failed); 
+
             var user = await _userManager.FindByNameAsync(email);
 
-            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
-            {
+            if (user == null)
                 // Don't reveal that the user does not exist or is not confirmed
-                return this.NestResult(Result.Failed); 
-            }
+                return this.NestResult(Result.UserNotFound); 
 
-            string password = Guid.NewGuid().ToString("N").ToLower()
-                      .Replace("1", "").Replace("o", "").Replace("0","")
-                      .Substring(0,10);
-
-            user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, password);
-            var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
+            switch (action)
             {
-                return this.NestResult(Result.Failed,
-                    JsonConvert.SerializeObject(result.Errors));                                  
-            }
-            
-            await _emailSender.SendEmailAsync(email, "Password Reset",
-                $"Your password was changed to {password}.");
-
-            return this.NestResultSingle(
-                Result.Succeeded, user, "An email was sent to " + email + 
-                " with a new password. Login and change the password.");                                        
-        }
-  
-        private async Task<object> CreateUserAsync(Permit permit)
-        {
-            // create user and confirm Pemail via a security code
-            var result = await _userManager.CreateAsync(permit.Owner, permit.Password);
-
-            if (result.Succeeded)
-            {
-                _logger.LogInformation("User created a new account with password.");
-
-                var code = await _userManager.GenerateEmailConfirmationTokenAsync(permit.Owner);
-                
-                await _emailSender.SendEmailAsync(permit.Owner.Email, "Confirm your email",
-                    $"Co    mplete the registration using the security code {code}.");
-
+            case "RequestEmailConfirmation":
+                // for -> ConfirmEmail
+                // for -> ChangePassword
+                await RequestEmailConfirmationAsync(user);
+                permit.User.Id = 0;
+                permit.User.Email = email;
                 return this.NestResultSingle(
-                    Result.Succeeded, permit, "An email was sent to " + permit.Owner.Email + 
-                    " with a security code. Register user details with the security code.");                                        
-            }
-            else
-            {
-                return this.NestResult(Result.Failed,
-                    JsonConvert.SerializeObject(result.Errors));                                  
-            }
-        }
+                    Result.Succeeded, permit);
 
-        private async Task<object> ConfirmUserAsync(Permit permit)
-        {
-            if (permit.Owner.Id == 0)
-            {
-                var user = await _userManager.FindByNameAsync(permit.Owner.Email);
-                user.CopyTo(permit.Owner);
-            }
-
-            var result = await _userManager.ConfirmEmailAsync(
-                permit.Owner, permit.SecurityCode);
-
-            if (result.Succeeded)
-            {
-                await _userManager.UpdateAsync(permit.Owner);
-                var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
-
-                if (adminUsers.Count == 0)
+            case "ConfirmEmail":
+                if (await IsEmailConfirmedAsync(user, securityCode))
                 {
-                    // Make the first user into the Admin   
-                    await _userManager.AddToRoleAsync(permit.Owner, "Admin");
+                    return await CreatePermitAsync(user, password, permit);
                 }
                 else
                 {
-                    await _userManager.AddToRoleAsync(permit.Owner, "User");
+                    return this.NestResult(Result.IncorrectSecurityCode); 
                 }
 
-                // Update the user and return                        
+            case "Login": 
+                return await CreatePermitAsync(user, password, permit);
+
+            case "ChangePassword":
+                if (await IsEmailConfirmedAsync(user, securityCode))
+                {
+                    if (string.IsNullOrEmpty(password))
+                        return this.NestResult(Result.PasswordRequired); 
+
+                    user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, password);    
+                    await _userManager.UpdateAsync(user);
+                    await _emailSender.SendEmailAsync(email, "Password Reset",
+                        "Your password was changed. Check if this is not you.");
+
+                    return await CreatePermitAsync(user, password, permit);
+                }
+                else
+                {
+                    return this.NestResult(Result.IncorrectSecurityCode); 
+                }
+            }
+
+            return this.NestResult(Result.Failed); 
+        }
+
+        // GET api/permits/{email}
+        [Authorize(Policy = "AllTraders")] 
+        [HttpGet("{email}")]
+        public async Task<JsonResult> RenewAccessAsync(string email)
+        {
+            //var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.FindByNameAsync(email);
+
+            // A valid user emailed confirmed user must exist
+            if (user == null || email != user.Email || !(await _userManager.IsEmailConfirmedAsync(user)))
+                return this.NestResult(Result.Failed); 
+
+            var savedToken = await _userManager.GetAuthenticationTokenAsync(
+                user, "JWTSample", "RefreshToken");
+
+            var receivedToken = await HttpContext.GetTokenAsync(
+                JwtBearerDefaults.AuthenticationScheme, "access_token");
+
+            if (savedToken != receivedToken)
+                return this.NestResult(Result.Failed); 
+
+            var renewedPermit = new Permit<Trader>();
+            SafeCopy(user, renewedPermit.User);
+            renewedPermit.RefreshToken = savedToken;
+            renewedPermit.AccessToken = _jwtFactory.Create(user,
+                    await _userManager.GetClaimsAsync(user));
+            
+            return this.NestResultSingle(
+                Result.Succeeded, renewedPermit);
+        }
+
+        // DELETE api/permits/{email}
+        [Authorize(Policy = "TraderManagers")] 
+        [HttpDelete("{email}")]
+        public async Task<JsonResult> RevokeAccessAsync(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return this.NestResult(Result.IncorrectEmail); 
+
+            var user = await _userManager.FindByNameAsync(email);
+
+            if (user == null)
+                return this.NestResult(Result.UserNotFound); 
+
+            await _userManager.RemoveAuthenticationTokenAsync(user, "JWTSample", "RefreshToken");
+            
+            return this.NestResult(Result.Succeeded);
+        }
+
+        async private Task<JsonResult> CreatePermitAsync(Trader user, string password,
+            Permit<Trader> permit)
+        {
+            if (string.IsNullOrEmpty(password))
+                return this.NestResult(Result.PasswordRequired); 
+
+            Permit<Trader> newPermit = await LoginAsync(user, password, permit);
+            if (newPermit != null)
                 return this.NestResultSingle(
-                    Result.Succeeded, permit, 
-                    "This user is now officially a member"); 
+                    Result.Succeeded, newPermit);
+            else
+                return this.NestResult(Result.LoginFailed); 
+        }
+
+        async private Task<Permit<Trader>> LoginAsync(Trader user, string password,
+            Permit<Trader> permit)
+        {
+            var result = await _signInManager.PasswordSignInAsync(
+                user.Email, password, false, false);
+            
+            if (result.Succeeded)
+            {
+                SafeCopy(user, permit.User);
+                return await CreateTokensAsync(user, permit);
             }
             else
             {
-                return this.NestResult(Result.IncorrectSecurityCode, 
-                    JsonConvert.SerializeObject(result.Errors));
+                return null;
             }
         }
 
-        async private Task<string> GenerateJwtTokenAsync(User user)
+        async private Task<Permit<Trader>> CreateTokensAsync(Trader user, Permit<Trader> permit)
         {
-            IdentityOptions options = new IdentityOptions();
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString(), ClaimValueTypes.Integer64)
-            };
+            permit.RefreshToken = _jwtFactory.Create(user);
+            permit.AccessToken = _jwtFactory.Create(user,
+                    await _userManager.GetClaimsAsync(user));
 
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            claims.AddRange(userClaims);
+            await _userManager.RemoveAuthenticationTokenAsync(user, "JWTSample", "RefreshToken");
+            await _userManager.SetAuthenticationTokenAsync(user, "JWTSample", "RefreshToken", permit.RefreshToken);
 
-            var userRoles = await _userManager.GetRolesAsync(user);
-            foreach (var userRole in userRoles)
+            await _signInManager.SignInAsync(user, true);
+
+            return permit;
+        }
+
+        async private Task RequestEmailConfirmationAsync(Trader user)
+        {
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            
+            await _emailSender.SendEmailAsync(user.Email, "Confirm your email",
+                $"Complete the registration using the security code {code}.");
+        }
+
+        async private Task<bool> IsEmailConfirmedAsync(Trader user, string securityCode)
+        {
+            if (string.IsNullOrEmpty(securityCode))
             {
-                claims.Add(new Claim(ClaimTypes.Role, userRole));
-                var role = await _roleManager.FindByNameAsync(userRole);
-                if(role != null)
-                {
-                    var roleClaims = await _roleManager.GetClaimsAsync(role);
-                    foreach(Claim roleClaim in roleClaims)
-                    {
-                        claims.Add(roleClaim);
-                    }
-                }
+                return false; 
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddHours(Convert.ToDouble(_configuration["JwtExpireHours"]));
+            var result = await _userManager.ConfirmEmailAsync(
+                user, securityCode);
 
-            var token = new JwtSecurityToken(
-                _configuration["JwtIssuer"],
-                _configuration["JwtIssuer"],
-                claims,
-                expires: expires,
-                signingCredentials: creds
-            );
+            return (result.Succeeded);
+        }
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }        
+        private void SafeCopy(Trader from, Trader to)
+        {
+            // Send back the non-security
+            // sensitive properties 
+            to.Id = from.Id;
+            to.Email = from.Email;
+            to.FirstName = from.FirstName;
+            to.LastName = from.LastName;
+            to.DateJoined = from.DateJoined;
+        }
     }
 }

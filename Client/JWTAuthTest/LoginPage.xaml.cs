@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Xamarin.Forms;
 
 namespace JWTAuthTest
 {
-    public partial class ConfirmUser : JWTAuthPage
+    public partial class LoginPage : JWTAuthPage
     {
-        public ConfirmUser(IndustryViewModel viewModel)
-            :base(viewModel)
+        public LoginPage()
         {
             InitializeComponent();
 
             _busyBundle = new ControlBundle(
                 new List<VisualElement> {
-                    SecurityCode,
+                    EntryPassword,
                     ButtonOkay, ButtonCancel });
 
             ButtonOkay.Clicked += ButtonOkay_ClickedAsync;
@@ -24,28 +24,28 @@ namespace JWTAuthTest
         {
             try
             {
-                if (_viewModel.IsLoginValid())
+                if (!_viewModel.IsPasswordValid())
                 {
-                    var result = await _viewModel.ConfirmUserAsync();
+                    ShowAlert("Please enter a password");
+                    return;
+                }
 
-                    if (result.Code == 0)
-                    {
-                        await Navigation.PopAsync();
-                    }
-                    else
-                    {
-                        ShowAlert(result);
-                    }
+                var result = await _viewModel.AuthViewModel
+                    .LoginAsync(_viewModel.Password);
+
+                if (result.Code == 0)
+                {
+                    await GoHomeAsync();
                 }
                 else
                 {
-                    ShowAlert("Please enter an email and password");
+                    ShowAlert(result);
                 }
             }
             catch (Exception ex)
             {
                 ShowAlert(ex);
-            } 
+            }
         }
 
         async void ButtonCancel_ClickedAsync(object sender, EventArgs e)

@@ -46,8 +46,11 @@
     <data name="InternalError" xml:space="preserve">
         <value>Internal Error</value>
     </data>
-    <data name="IncorrectEmail" xml:space="preserve">
+    <data name="UserNotFound" xml:space="preserve">
         <value>User Not Found</value>
+    </data>    
+    <data name="IncorrectEmail" xml:space="preserve">
+        <value>Incorrect Email</value>
     </data>
     <data name="EmailNotConfirmed" xml:space="preserve">
         <value>Email NotConfirmed</value>
@@ -60,10 +63,12 @@
     </data>
     <data name="InvalidShare" xml:space="preserve">
         <value>Invalid Share</value>
-    </data>
-    
+    </data>    
     <data name="LoginFailed" xml:space="preserve">
         <value>Login Failed</value>
     </data>  
+    <data name="PasswordRequired" xml:space="preserve">
+        <value>Password Required</value>
+    </data> 
     
 </root>

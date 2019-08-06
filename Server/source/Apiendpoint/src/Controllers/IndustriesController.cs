@@ -14,6 +14,7 @@ using Inkton.Nest.Model;
 using Jwtauth.Database;
 using Jwtauth.Model;
 using Jwtauth.Services;
+using Jwtauth.Helpers;
 
 namespace Jwtauth.Controllers
 {
@@ -23,12 +24,12 @@ namespace Jwtauth.Controllers
     {
         private readonly ILogger _logger;
         private readonly IIndustryRepository _repo;
-        private readonly Runtime _runtime;
+        private readonly NesterServices _runtime;
 
         public IndustriesController(
             ILogger<IndustriesController> logger,
             IIndustryRepository repo,
-            Runtime runtime)
+            NesterServices runtime)
         {
             _logger = logger;
             _repo = repo;
@@ -36,8 +37,8 @@ namespace Jwtauth.Controllers
         }
 
         [HttpGet]
-        [Authorize(Policy = "AllAllowed")]
-        public IActionResult Get()
+        [Authorize(Policy = "SkilledTraders")] 
+        public JsonResult Get()
         {
             try
             {
@@ -47,14 +48,16 @@ namespace Jwtauth.Controllers
             }
             catch (System.Exception e)
             {
-                return StatusCode(500, e);
+                return this.NestResult(
+                    Result.InternalError,
+                    e.Message);
             }
         }
 
         // GET api/industries/{id}/shares
-        [HttpGet("{industry_id}/shares")]
-        [Authorize(Policy = "AllAllowed")]
-        public IActionResult QueryShares(int industry_id)
+        [Authorize(Policy = "SkilledTraders")] 
+        [HttpGet("{industry_id}/shares")]        
+        public JsonResult QueryShares(int industry_id)
         {
             try
             {
@@ -64,14 +67,16 @@ namespace Jwtauth.Controllers
             }
             catch (System.Exception e)
             {
-                return StatusCode(500, e);
+                return this.NestResult(
+                    Result.InternalError,
+                    e.Message);
             }
         }
 
         // GET api/industries/:{id}/shares/{share_id}
+        [Authorize(Policy = "SkilledTraders")] 
         [HttpGet("{industry_id}/shares/{share_id}")]
-        [Authorize(Policy = "AllAllowed")]
-        public IActionResult QueryShare(int industry_id, int share_id)
+        public JsonResult QueryShare(int industry_id, int share_id)
         {
             try
             {
@@ -94,13 +99,15 @@ namespace Jwtauth.Controllers
             }
             catch (System.Exception e)
             {
-                return StatusCode(500, e);
+                return this.NestResult(
+                    Result.InternalError,
+                    e.Message);
             }
         } 
 
         [HttpPost("{industry_id}/shares")]
-        [Authorize(Policy = "OnlyAdminsAllowed")] 
-        public IActionResult Create(int industry_id, [FromBody] Share share)
+        [Authorize(Policy = "TraderManagers")] 
+        public JsonResult Create(int industry_id, [FromBody] Share share)
         {
             try
             {
@@ -118,13 +125,15 @@ namespace Jwtauth.Controllers
             }
             catch (System.Exception e)
             {
-                return StatusCode(500, e);
+                 return this.NestResult(
+                    Result.InternalError,
+                    e.Message);
             }
         }
 
         [HttpPut("{industry_id}/shares/{share_id}")]
-        [Authorize(Policy = "OnlyAdminsAllowed")] 
-        public IActionResult Update(int industry_id, int share_id, [FromBody] Share share)
+        [Authorize(Policy = "TraderManagers")] 
+        public JsonResult Update(int industry_id, int share_id, [FromBody] Share share)
         {
             try
             {
@@ -142,13 +151,15 @@ namespace Jwtauth.Controllers
             }
             catch (System.Exception e)
             {
-                return StatusCode(500, e);
+                return this.NestResult(
+                    Result.InternalError,
+                    e.Message);
             }
         }
 
         [HttpDelete("{industry_id}/shares/{share_id}")]
-        [Authorize(Policy = "OnlyAdminsAllowed")] 
-        public IActionResult Delete(int industry_id, int share_id, [FromBody] Share share)
+        [Authorize(Policy = "TraderManagers")] 
+        public JsonResult Delete(int industry_id, int share_id, [FromBody] Share share)
         {
             try
             {
@@ -159,7 +170,9 @@ namespace Jwtauth.Controllers
             }
             catch (System.Exception e)
             {
-                return StatusCode(500, e);
+                return this.NestResult(
+                    Result.InternalError,
+                    e.Message);
             }
         }
     }

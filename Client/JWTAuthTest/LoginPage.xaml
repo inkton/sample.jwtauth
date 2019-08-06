@@ -1,23 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <local:JWTAuthPage xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
              xmlns:local="clr-namespace:JWTAuthTest" 
-             x:Class="JWTAuthTest.ConfirmUser"
-             Title="Confirm Security Code">
+             x:Class="JWTAuthTest.LoginPage"
+             Title="Login">
     <ContentPage.Content>
     <StackLayout>
         
         <FlexLayout Direction="Column" AlignItems="Center"
                 JustifyContent="SpaceEvenly">            
-            
-            <StackLayout Orientation="Vertical" Margin="0,80,0,0">
-                <StackLayout Orientation="Horizontal">
-                    <Label Text="Security Code" x:Name="LabelSecurityCode" WidthRequest="120" VerticalOptions="CenterAndExpand" />
-                    <Entry x:Name="SecurityCode" WidthRequest="75" VerticalOptions="CenterAndExpand"
-                          Keyboard="Numeric" Text="{Binding Path=AuthViewModel.Platform.Permit.SecurityCode, Mode=TwoWay}" />
-                </StackLayout>
+
+            <StackLayout Orientation="Horizontal" Margin="0,80,0,0">
+                <Label Text="Password" x:Name="LabelPassword" WidthRequest="75" VerticalOptions="CenterAndExpand" />
+                <Entry x:Name="EntryPassword" WidthRequest="150" VerticalOptions="CenterAndExpand"
+                        IsPassword="true" Text="{Binding Path=Password}" />
             </StackLayout>
-            
+                      
             <StackLayout HorizontalOptions="CenterAndExpand" Orientation="Horizontal">
                 <Button x:Name="ButtonOkay" Text="Okay" WidthRequest="60" />
                 <Button x:Name="ButtonCancel" Text="Cancel" WidthRequest="60" />                    
