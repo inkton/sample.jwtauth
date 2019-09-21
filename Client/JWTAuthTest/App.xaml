@@ -1,5 +1,144 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Application xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="JWTAuthTest.App">
+<Application xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="Jwtauth.App">
     <Application.Resources>
+
+        <Color x:Key="Primary">#2196F3</Color>
+        <Color x:Key="Accent">#96d1ff</Color>
+        <Color x:Key="Alert">#ff7675</Color>
+        <Color x:Key="Text">#ffffff</Color>     
+        <Color x:Key="LightTextColor">#999999</Color>
+        <Color x:Key="TextInverse">#267cb5</Color>  
+        
+        <OnPlatform x:TypeArguments="x:String" x:Key="BoldFont">
+            <On Platform="Android" Value="OpenSans-Bold.ttf#Open Sans" />
+            <On Platform="UWP" Value="/Assets/OpenSans-Bold.ttf#Open Sans" />
+            <On Platform="iOS" Value="OpenSans-Bold" />
+        </OnPlatform>
+        <OnPlatform x:TypeArguments="x:String" x:Key="NormalFont">
+            <On Platform="Android" Value="OpenSans-Regular.ttf#Open Sans" />
+            <On Platform="UWP" Value="/Assets/OpenSans-Regular.ttf#Open Sans" />
+            <On Platform="iOS" Value="OpenSans-Regular" />
+        </OnPlatform>
+        <Style x:Key="FlexLayoutHeaderPadding" TargetType="FlexLayout">
+        </Style>
+        <Style x:Key="FlexLayoutFooterPadding" TargetType="FlexLayout">
+            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        </Style>
+        <Style x:Key="SectionHeader" TargetType="FlexLayout">
+            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+            <Setter Property="Margin" Value="10,5,10,5" />
+            <Setter Property="Padding" Value="5,0,0,0" />
+            <Setter Property="HeightRequest" Value="35" />
+        </Style>
+        <Style x:Key="SectionHeaderLabel" TargetType="Label">
+            <Setter Property="TextColor" Value="{StaticResource Text}" />
+            <Setter Property="FontSize" Value="Large" />
+            <Setter Property="HorizontalTextAlignment" Value="Start" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="SectionSubHeaderLabel" TargetType="Label">
+            <Setter Property="TextColor" Value="{StaticResource TextInverse}" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="FontSize" Value="Medium" />
+            <Setter Property="HorizontalTextAlignment" Value="Start" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+            <Setter Property="Margin" Value="10,10,10,10" />
+            <Setter Property="HeightRequest" Value="35" />
+        </Style>
+        <Style x:Key="LabelH1" TargetType="Label">
+            <Setter Property="Margin" Value="0,0,0,40" />
+            <Setter Property="FontSize" Value="Header" />
+            <Setter Property="HeightRequest" Value="130" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+            <Setter Property="TextColor" Value="{StaticResource Text}" />            
+        </Style>
+        <Style x:Key="LabelH2" TargetType="Label">
+            <Setter Property="FontSize" Value="Medium" />
+            <Setter Property="Margin" Value="5,10,5,10" />
+        </Style>
+        <Style x:Key="LabelH3" TargetType="Label">
+            <Setter Property="FontSize" Value="Subtitle" />
+            <Setter Property="Margin" Value="5,10,5,10" />
+        </Style>
+        <Style x:Key="LabelRow" TargetType="Label">
+            <Setter Property="FontSize" Value="Body" />
+            <Setter Property="TextColor" Value="{StaticResource Accent}" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="Medium" />
+        </Style>
+        <Style x:Key="DetailRow" TargetType="Label">
+            <Setter Property="FontSize" Value="Body" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="Medium" />
+        </Style>      
+        <Style x:Key="LabelValidateFailMsg" TargetType="Label">
+            <Setter Property="Margin" Value="20,0,20,0" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="HeightRequest" Value="8" />
+            <Setter Property="TextColor" Value="{StaticResource Alert}" />            
+        </Style>
+            
+        <Style x:Key="EntryPrimary" TargetType="Entry">
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="ButtonLargePrimary" TargetType="Button">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+            <Setter Property="BorderColor" Value="{StaticResource Accent}" />
+            <Setter Property="TextColor" Value="{StaticResource Text}" />
+            <Setter Property="Margin" Value="10,0,10,10" />
+            <Setter Property="HeightRequest" Value="50" />
+            <Setter Property="HorizontalOptions" Value="FillAndExpand" />                
+        </Style>
+        <Style x:Key="ButtonLargeSecondary" TargetType="Button">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="BackgroundColor" Value="{StaticResource Accent}" />
+            <Setter Property="BorderColor" Value="{StaticResource Accent}" />
+            <Setter Property="TextColor" Value="{StaticResource Text}" />
+            <Setter Property="Margin" Value="10,0,10,10" />
+            <Setter Property="HeightRequest" Value="50" />  
+            <Setter Property="HorizontalOptions" Value="FillAndExpand" />                                
+        </Style>
+        <Style x:Key="ButtonFunction" TargetType="Button">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="BackgroundColor" Value="{StaticResource Accent}" />
+            <Setter Property="BorderColor" Value="{StaticResource Accent}" />
+            <Setter Property="TextColor" Value="{StaticResource Text}" />
+            <Setter Property="Margin" Value="10,0,10,10" />
+            <Setter Property="HeightRequest" Value="35" />  
+            <Setter Property="HorizontalOptions" Value="FillAndExpand" />                                
+        </Style>                 
+        <Style x:Key="ButtonLookup" TargetType="Button">
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+            <Setter Property="BorderColor" Value="{StaticResource Accent}" />
+            <Setter Property="TextColor" Value="{StaticResource Text}" />
+            <Setter Property="HorizontalOptions" Value="End" /> 
+            <Setter Property="HeightRequest" Value="35" />  
+            <Setter Property="BorderRadius" Value="15" />  
+        </Style>
+       
+        <Style x:Key="ProgressLog" TargetType="Label">
+            <Setter Property="TextColor" Value="{StaticResource TextInverse}" />
+            <Setter Property="HeightRequest" Value="35" />  
+            <Setter Property="FontSize" Value="11" /> 
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+        </Style>
+        
+        <Style x:Key="ProgressBarActive" TargetType="ProgressBar">
+            <Setter Property="ProgressColor" Value="{StaticResource Accent}" />
+            <Setter Property="HeightRequest" Value="5" />  
+        </Style>        
+
     </Application.Resources>
 </Application>

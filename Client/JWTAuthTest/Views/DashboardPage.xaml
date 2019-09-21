@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<views:JwtauthPage xmlns="http://xamarin.com/schemas/2014/forms" 
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+            xmlns:views="clr-namespace:Jwtauth.Views"
+            x:Class="Jwtauth.Views.DashboardPage">
+    <ContentPage.Content>
+    <FlexLayout Direction="Column" >
+
+        <FlexLayout Style="{StaticResource SectionHeader}">
+            <Label Text="Company Shares"
+                    Style="{StaticResource SectionHeaderLabel}" />
+        </FlexLayout>
+
+        <!-- Body  -->
+        <FlexLayout Direction="Column"
+                    AlignItems="Center"
+                    JustifyContent="Start"
+                    FlexLayout.Basis="60%">
+
+            <!-- Content -->
+            <Label Text="Share Prices" Style="{StaticResource LabelH2}" />
+                
+            <Picker x:Name="Industries"
+                Title="Industries"
+                Margin="10,20,10,20"
+                SelectedItem="{Binding SelectedIndustry, Mode=TwoWay}"
+                ItemsSource="{Binding Industries}"
+                ItemDisplayBinding="{Binding Name}" 
+                HorizontalOptions="CenterAndExpand"   
+                WidthRequest="120"/>               
+                
+            <ListView x:Name="ListViewShares"
+                Margin="10,0,10,0"
+                ItemsSource="{Binding Shares}"
+                SelectedItem="{Binding SelectedShare, Mode=TwoWay}"
+                HeightRequest="180" WidthRequest="250">   
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid>
+                                <Label Text="{Binding Tag}" FontAttributes="Bold" />
+                                <Label Grid.Column="1" Text="{Binding Shares}" />
+                                <Label Grid.Column="2" Text="{Binding Price, StringFormat='$ {0:F2}'}}" />
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>                    
+            </ListView>                           
+        </FlexLayout>
+
+        <FlexLayout Direction="Column"
+                    FlexLayout.Grow="1">
+        </FlexLayout>
+
+        <!-- Footer -->
+        <FlexLayout Direction="Column"
+                    AlignItems="Center"
+                    JustifyContent="SpaceEvenly"
+                    FlexLayout.Basis="20%">
+
+            <ActivityIndicator x:Name="isActive"
+                IsRunning="{Binding IsBusy}"
+                VerticalOptions="Start" />
+            
+            <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+                <Button x:Name="ButtonGetCached" Style="{StaticResource ButtonFunction}" Text="Cached Price" WidthRequest="110" />
+                <Button x:Name="ButtonGetCurrent" Style="{StaticResource ButtonFunction}" Text="Current Price" WidthRequest="110" />               
+            </StackLayout>
+
+            <StackLayout  Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+                <Button x:Name="ButtonAdd" Style="{StaticResource ButtonFunction}" Text="Add" WidthRequest="100" />
+                <Button x:Name="ButtonUpdate" Style="{StaticResource ButtonFunction}" Text="Update" WidthRequest="100" />
+                <Button x:Name="ButtonDelete" Style="{StaticResource ButtonFunction}" Text="Delete" WidthRequest="100" /> 
+            </StackLayout>
+            
+            <Label Text="{Binding Status}" FontSize="Small" LineBreakMode="WordWrap" 
+                   VerticalOptions="CenterAndExpand" />
+
+        </FlexLayout>
+
+        <FlexLayout FlexLayout.Basis="10%"
+                    Direction="Column"
+                    Style="{StaticResource FlexLayoutFooterPadding}" >
+        </FlexLayout>
+
+    </FlexLayout>
+
+    </ContentPage.Content>
+</views:JwtauthPage>

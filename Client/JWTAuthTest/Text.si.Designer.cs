@@ -16,21 +16,21 @@ namespace Jwtauth {
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Text {
+    internal class Text_si {
         
         private static System.Resources.ResourceManager resourceMan;
         
         private static System.Globalization.CultureInfo resourceCulture;
         
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Text() {
+        internal Text_si() {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.Equals(null, resourceMan)) {
-                    System.Resources.ResourceManager temp = new System.Resources.ResourceManager("Jwtauth.Text", typeof(Text).Assembly);
+                    System.Resources.ResourceManager temp = new System.Resources.ResourceManager("Jwtauth.Text.si", typeof(Text_si).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -95,12 +95,6 @@ namespace Jwtauth {
             }
         }
         
-        internal static string UserNotFound {
-            get {
-                return ResourceManager.GetString("UserNotFound", resourceCulture);
-            }
-        }
-        
         internal static string IncorrectEmail {
             get {
                 return ResourceManager.GetString("IncorrectEmail", resourceCulture);
@@ -134,12 +128,6 @@ namespace Jwtauth {
         internal static string LoginFailed {
             get {
                 return ResourceManager.GetString("LoginFailed", resourceCulture);
-            }
-        }
-        
-        internal static string PasswordRequired {
-            get {
-                return ResourceManager.GetString("PasswordRequired", resourceCulture);
             }
         }
     }
