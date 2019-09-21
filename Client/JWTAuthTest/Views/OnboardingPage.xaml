@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<views:JwtauthPage xmlns="http://xamarin.com/schemas/2014/forms" 
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+            xmlns:views="clr-namespace:Jwtauth.Views"
+            xmlns:helpers="clr-namespace:Jwtauth.Helpers"  
+            xmlns:validators="clr-namespace:Jwtauth.Helpers.Validators"
+            NavigationPage.HasBackButton="False"
+            x:Class="Jwtauth.Views.OnboardingPage">
+    <ContentPage.Resources>
+    </ContentPage.Resources>
+        <AbsoluteLayout HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">                          
+            <!-- Main -->
+            
+            <Image AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All" Aspect="AspectFill"
+                   Source="{helpers:ImageResource Jwtauth.Images.Background}" />    
+            
+            <!-- Main End -->
+            
+            <FlexLayout AbsoluteLayout.LayoutBounds="0,0,1,1" 
+                        AbsoluteLayout.LayoutFlags="All"                   
+                        Direction="Column">
+                
+                <Image FlexLayout.Basis="30%"
+                       FlexLayout.AlignSelf="Center"
+                       Source="{helpers:ImageResource Jwtauth.Images.Icon}" />    
+                
+                 <FlexLayout FlexLayout.Grow="1">
+                 </FlexLayout> 
+            
+                <StackLayout Spacing="0" Padding="0,10,0,10" VerticalOptions="End" >
+                                
+                    <Entry x:Name="EmailEntry"
+                        Style="{StaticResource EntryPrimary}"
+                        Margin="20,5,20,5"                        
+                        Keyboard="Email"
+                        Text="{Binding Path=Backend.Permit.User.Email, Mode=TwoWay}"
+                        Placeholder="Email">
+                      <Entry.Behaviors>
+                        <validators:EntryValidatorBehavior
+                            IsCheckEmpty="True"
+                            IsCheckEmail="True"
+                            MinLength="0"
+                            MaxLength="255"
+                            x:Name="EmailValidator" />
+                      </Entry.Behaviors>                    
+                    </Entry>
+
+                    <Button x:Name="ButtonLogin"
+                        Style="{StaticResource ButtonLargePrimary}"
+                        IsEnabled="{Binding Validated}"
+                        Text="Login"  
+                        Margin="20,5,20,5" />
+
+                    <Button x:Name="ButtonRegister"
+                        Style="{StaticResource ButtonLargePrimary}"
+                        IsEnabled="{Binding Validated}"
+                        Text="Register"
+                        Margin="20,5,20,5" />
+                
+                    <Label x:Name="LabelForgot" Text="Forgot password" 
+                        Margin="20,5,20,5"
+                        IsEnabled="{Binding Validated}"
+                        HorizontalTextAlignment="Start"
+                        HorizontalOptions="StartAndExpand"
+                        TextColor="{StaticResource Text}"
+                        Style="{StaticResource LabelH3}">
+                           <Label.GestureRecognizers>
+                                <TapGestureRecognizer  
+                                    Tapped="LabelForgot_TappedAsync"
+                                    NumberOfTapsRequired="1" />
+                            </Label.GestureRecognizers>                    
+                    </Label>
+                
+                    <Label x:Name="ActivityLog" Text="{Binding Status}" Style="{StaticResource ProgressLog}" />                 
+                    <ProgressBar x:Name="ActiveIndicator" Progress="{Binding Progress}" 
+                                 Style="{StaticResource ProgressBarActive}" />
+                
+                </StackLayout>
+            </FlexLayout>      
+        </AbsoluteLayout>
+</views:JwtauthPage>
