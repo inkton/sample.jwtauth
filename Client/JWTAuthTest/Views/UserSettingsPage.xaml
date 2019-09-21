@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<views:JwtauthPage xmlns="http://xamarin.com/schemas/2014/forms" 
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+            xmlns:views="clr-namespace:Jwtauth.Views"
+            xmlns:helpers="clr-namespace:Jwtauth.Helpers"   
+            xmlns:validators="clr-namespace:Jwtauth.Helpers.Validators"
+            x:Class="Jwtauth.Views.UserSettingsPage">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+        <helpers:InverseBoolConverter x:Key="inverseBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.Content>
+    <FlexLayout Direction="Column"
+                JustifyContent="Start">
+
+        <!-- Header -->
+        <FlexLayout FlexLayout.Basis="10%"
+                    Direction="Column"
+                    Style="{StaticResource FlexLayoutHeaderPadding}" >
+        </FlexLayout>
+        
+        <!-- Body  -->
+        <StackLayout Orientation="Vertical" IsVisible="{Binding UserViewModel.MakeUserDetails}">
+
+            <FlexLayout Style="{StaticResource SectionHeader}">
+                <Label Text="User details"
+                        Style="{StaticResource SectionHeaderLabel}" />
+            </FlexLayout>
+
+            <!-- Content -->
+            <Entry Style="{StaticResource EntryPrimary}"
+                x:Name="FirstName"
+                Margin="10,0,10,0"
+                Text="{Binding Path=Backend.Permit.User.FirstName}"
+                Keyboard="Keyboard.Text"
+                Placeholder="Enter the first name">
+                <Entry.Behaviors>
+                    <validators:EntryValidatorBehavior
+                        IsCheckEmpty="True"
+                        MaxLength="255"
+                        x:Name="FirstNameValidator" />
+                </Entry.Behaviors>                    
+            </Entry>
+            <Label Style="{StaticResource LabelValidateFailMsg}"
+                Text="{Binding Source={x:Reference FirstNameValidator}, Path=Message}"
+                Opacity="{Binding Source={x:Reference FirstNameValidator}, Path=IsVisibleMessage}" />
+            
+            <Entry Style="{StaticResource EntryPrimary}"
+                x:Name="LastName"
+                Margin="10,0,10,0"
+                Text="{Binding Path=Backend.Permit.User.LastName, Mode=TwoWay}"
+                Keyboard="Keyboard.Text"
+                Placeholder="Enter the last name">
+                <Entry.Behaviors>
+                    <validators:EntryValidatorBehavior
+                        IsCheckEmpty="True"
+                        MaxLength="255"
+                        x:Name="LastNameValidator" />
+                </Entry.Behaviors>                    
+            </Entry>
+            <Label Style="{StaticResource LabelValidateFailMsg}"
+                Text="{Binding Source={x:Reference LastNameValidator}, Path=Message}"
+                Opacity="{Binding Source={x:Reference LastNameValidator}, Path=IsVisibleMessage}" />
+
+            <StackLayout Orientation="Horizontal"
+                Margin="10,0,10,0">
+                <Label Text="Date Joined"
+                       x:Name="LabelDateJoined"
+                       WidthRequest="150" VerticalOptions="CenterAndExpand" />
+                <DatePicker x:Name="DateJoined" WidthRequest="120"
+                            Date="{Binding Path=Backend.Permit.User.DateJoined, Mode=TwoWay}" VerticalOptions="CenterAndExpand" />
+            </StackLayout>
+
+        </StackLayout>
+
+        <StackLayout Orientation="Vertical" IsVisible="{Binding UserViewModel.MakePassword}">
+
+            <FlexLayout Style="{StaticResource SectionHeader}">
+                <Label Text="Create password"
+                        Style="{StaticResource SectionHeaderLabel}" />
+            </FlexLayout>
+
+            <Entry x:Name="EntryPassword"
+                    Style="{StaticResource EntryPrimary}"
+                    Margin="10,0,10,0"
+                    IsPassword="true"
+                    Text="{Binding Path=UserViewModel.Password, Mode=TwoWay}"
+                    Placeholder="Enter a password" >
+                <Entry.Behaviors>
+                    <validators:EntryValidatorBehavior
+                    IsCheckEmpty="True"
+                    x:Name="PasswordValidator" />
+                </Entry.Behaviors>                                                     
+            </Entry>
+
+            <Label Style="{StaticResource LabelValidateFailMsg}"
+                    Text="{Binding Source={x:Reference PasswordValidator}, Path=Message}"
+                    Opacity="{Binding Source={x:Reference PasswordValidator}, Path=IsVisibleMessage}" />
+
+            <Entry x:Name="EntryPasswordConfirm"
+                    Style="{StaticResource EntryPrimary}"
+                    Margin="10,0,10,0"
+                    IsPassword="true"
+                    Text="{Binding Path=UserViewModel.PasswordConfirm, Mode=TwoWay}"
+                    Placeholder="Confirm password" >
+                <Entry.Behaviors>
+                    <validators:EntryValidatorBehavior
+                    IsCheckEmpty="True"
+                    x:Name="EntryPasswordConfirmValidator" />
+                </Entry.Behaviors>     
+            </Entry>
+
+            <Label Style="{StaticResource LabelValidateFailMsg}"
+                    Text="{Binding Source={x:Reference EntryPasswordConfirmValidator}, Path=Message}"
+                    Opacity="{Binding Source={x:Reference EntryPasswordConfirmValidator}, Path=IsVisibleMessage}" />
+        </StackLayout>
+
+        <FlexLayout Direction="Column"
+                    FlexLayout.Grow="1">
+        </FlexLayout>
+
+        <!-- Footer -->
+        <FlexLayout Direction="Column"
+                    Wrap="NoWrap"
+                    JustifyContent="End"
+                    FlexLayout.Basis="180">
+
+            <ActivityIndicator x:Name="isActive"                  
+                IsRunning="{Binding IsBusy}"
+                VerticalOptions="Start" />
+
+            <Button x:Name="ButtonOkay"
+                Style="{StaticResource ButtonLargeSecondary}"
+                Text="Okay" />                    
+            <Button x:Name="ButtonCancel"
+                Style="{StaticResource ButtonLargeSecondary}"
+                Text="Cancel"/>        
+
+        </FlexLayout>
+
+        <FlexLayout FlexLayout.Basis="10%"
+                    Direction="Column"
+                    Style="{StaticResource FlexLayoutFooterPadding}" >
+        </FlexLayout>
+
+    </FlexLayout>
+    </ContentPage.Content>
+</views:JwtauthPage>

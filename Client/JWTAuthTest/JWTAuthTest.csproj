@@ -2,43 +2,82 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <ProduceAssemblyReference>true</ProduceAssemblyReference>
+    <RootNamespace>Jwtauth</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.1.0.618606" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.2.0" />
-    <PackageReference Include="Inkton.NesterLibrary" Version="1.5.4" />
+    <PackageReference Include="Xamarin.Forms" Version="4.2.0.815419" />  
+    <PackageReference Include="Xamarin.Essentials" Version="1.3.1" />
+    <PackageReference Include="Inkton.NesterLibrary" Version="1.5.7" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Altert.cs" />
+    <Compile Remove="Helpers\Dns.cs" />
+    <Compile Remove="Views\UserClaimsPage.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="Text.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Text.Designer.cs</LastGenOutput>
-      <IncludeInPackage>true</IncludeInPackage>
+    <Folder Include="Images\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Images\Icon.png" />
+    <None Remove="Images\Background.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Images\Icon.png">
+      <LogicalName>Icon</LogicalName>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="Views\UserClaimsPage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Images\Icon.png">
+      <LogicalName>Jwtauth.Images.Icon</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Images\Background.jpg">
+      <LogicalName>Jwtauth.Images.Background</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Server\source\shared\Model\Industry.cs">
-      <Link>Model\Industry.cs</Link>
+    <Compile Include="..\..\..\..\JWTAuth\source\shared\Model\Trader.cs">
+      <Link>Models\Trader.cs</Link>
     </Compile>
-    <Compile Include="..\..\Server\source\shared\Model\Share.cs">
-      <Link>Model\Share.cs</Link>
+    <Compile Include="..\..\..\..\JWTAuth\source\shared\Model\Share.cs">
+      <Link>Models\Share.cs</Link>
     </Compile>
-    <Compile Include="..\..\Server\source\shared\Model\Trader.cs">
-      <Link>Model\Trader.cs</Link>
+    <Compile Include="..\..\..\..\JWTAuth\source\shared\Model\Industry.cs">
+      <Link>Models\Industry.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\JWTAuth\source\shared\Helpers\ResultCodes.cs">
+      <Link>Helpers\ResultCodes.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Text.Designer.cs">
+    <EmbeddedResource Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " Update="Text.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Text.Designer.cs</LastGenOutput>
+      <LogicalName>JWTAuthTest.Text.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " Update="Text.si.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Text.si.Designer.cs</LastGenOutput>
+      <LogicalName>JWTAuthTest.Text.si.resources</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="Text.Designer.cs">
       <DependentUpon>Text.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Text.si.Designer.cs">
+      <DependentUpon>Text.si.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 </Project>

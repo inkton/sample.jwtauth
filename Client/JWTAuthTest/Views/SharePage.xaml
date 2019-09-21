@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<views:JwtauthPage xmlns="http://xamarin.com/schemas/2014/forms" 
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+            xmlns:views="clr-namespace:Jwtauth.Views"
+            xmlns:helpers="clr-namespace:Jwtauth.Helpers"
+            xmlns:validators="clr-namespace:Jwtauth.Helpers.Validators"
+            x:Class="Jwtauth.Views.SharePage">
+    <ContentPage.Content>
+    <FlexLayout Direction="Column"
+                JustifyContent="Start">
+
+        <!-- Header -->
+        <FlexLayout FlexLayout.Basis="10%"
+                    Direction="Column"
+                    Style="{StaticResource FlexLayoutHeaderPadding}" >
+        </FlexLayout>
+        
+        <!-- Body  -->
+        <StackLayout Orientation="Vertical">
+
+            <FlexLayout Style="{StaticResource SectionHeader}">
+                <Label Text="Edit Share"
+                        Style="{StaticResource SectionHeaderLabel}" />
+            </FlexLayout>
+
+            <!-- Content -->
+            <FlexLayout Direction="Row">
+                <Label Text="Id" Margin="10,0,0,0" FlexLayout.Basis="20%" VerticalOptions="CenterAndExpand" />
+                <Entry Style="{StaticResource EntryPrimary}"
+                    FlexLayout.Basis="80%" 
+                    x:Name="IdTag"
+                    Margin="10,0,10,0"
+                    Text="{Binding Path=SelectedShare.Id, Mode=TwoWay}"
+                    Keyboard="Keyboard.Text"
+                    Placeholder="Enter the share id">
+                    <Entry.Behaviors>
+                        <validators:EntryValidatorBehavior
+                            IsCheckEmpty="True"
+                            MaxLength="5"
+                            x:Name="IdTagValidator" />
+                    </Entry.Behaviors>                    
+                </Entry>
+            </FlexLayout>
+
+            <Label Style="{StaticResource LabelValidateFailMsg}"
+                Text="{Binding Source={x:Reference IdTagValidator}, Path=Message}"
+                Opacity="{Binding Source={x:Reference IdTagValidator}, Path=IsVisibleMessage}" />
+
+            <FlexLayout Direction="Row">
+                <Label Text="Tag" Margin="10,0,0,0" FlexLayout.Basis="20%" VerticalOptions="CenterAndExpand" />
+
+                <Entry Style="{StaticResource EntryPrimary}"
+                    FlexLayout.Basis="80%" 
+                    x:Name="EntryTag"
+                    Margin="10,0,10,0"
+                    Text="{Binding Path=SelectedShare.Tag, Mode=TwoWay}"
+                    Keyboard="Keyboard.Text"
+                    Placeholder="Enter the share code">
+                    <Entry.Behaviors>
+                        <validators:EntryValidatorBehavior
+                            IsCheckEmpty="True"
+                            MaxLength="5"
+                            x:Name="EntryTagValidator" />
+                    </Entry.Behaviors>                    
+                </Entry>
+            </FlexLayout>
+            <Label Style="{StaticResource LabelValidateFailMsg}"
+                Text="{Binding Source={x:Reference EntryTagValidator}, Path=Message}"
+                Opacity="{Binding Source={x:Reference EntryTagValidator}, Path=IsVisibleMessage}" />
+
+            <FlexLayout Direction="Row">
+                <Label Text="Price" Margin="10,0,0,0" FlexLayout.Basis="20%" VerticalOptions="CenterAndExpand" />
+
+                <Entry Style="{StaticResource EntryPrimary}"
+                    FlexLayout.Basis="80%" 
+                    x:Name="EntryPrice"
+                    Margin="10,0,10,0"
+                    Text="{Binding Path=SelectedShare.Price, Mode=TwoWay}"
+                    Keyboard="Keyboard.Text"
+                    Placeholder="Enter the share price">
+                    <Entry.Behaviors>
+                        <validators:EntryValidatorBehavior
+                            IsCheckEmpty="True"
+                            MaxLength="25"
+                            x:Name="EntryPriceValidator" />
+                    </Entry.Behaviors>                    
+                </Entry>
+            </FlexLayout>
+            <Label Style="{StaticResource LabelValidateFailMsg}"
+                Text="{Binding Source={x:Reference EntryPriceValidator}, Path=Message}"
+                Opacity="{Binding Source={x:Reference EntryPriceValidator}, Path=IsVisibleMessage}" />
+                                          
+        </StackLayout>
+
+        <FlexLayout Direction="Column"
+                    FlexLayout.Grow="1">
+        </FlexLayout>
+
+        <!-- Footer -->
+        <FlexLayout Direction="Column"
+                    AlignItems="Center"
+                    JustifyContent="SpaceEvenly"
+                    FlexLayout.Basis="180">
+
+            <ActivityIndicator x:Name="isActive"                  
+                IsRunning="{Binding IsBusy}"
+                VerticalOptions="Start" />
+
+            <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+                <Button x:Name="ButtonOkay" Style="{StaticResource ButtonFunction}" Text="Okay" WidthRequest="100" />
+                <Button x:Name="ButtonCancel" Style="{StaticResource ButtonFunction}" Text="Cancel" WidthRequest="100" />
+            </StackLayout>
+            
+            <Label Text="{Binding Status}" FontSize="Small" LineBreakMode="WordWrap" 
+                   VerticalOptions="CenterAndExpand" />
+
+        </FlexLayout>
+
+        <FlexLayout FlexLayout.Basis="10%"
+                    Direction="Column"
+                    Style="{StaticResource FlexLayoutFooterPadding}" >
+        </FlexLayout>
+
+    </FlexLayout>
+    </ContentPage.Content>
+</views:JwtauthPage>

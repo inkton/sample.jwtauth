@@ -18,5 +18,5 @@ namespace Jwtauth.Config.Database
 
             builder.ToTable("Trader");
         }
-    }    
+    }
 }

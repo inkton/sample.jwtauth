@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<views:JwtauthPage xmlns="http://xamarin.com/schemas/2014/forms" 
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+            xmlns:views="clr-namespace:Jwtauth.Views"
+            xmlns:helpers="clr-namespace:Jwtauth.Helpers"   
+            xmlns:validators="clr-namespace:Jwtauth.Helpers.Validators"
+            NavigationPage.HasBackButton="False"
+            x:Class="Jwtauth.Views.UserConfirmPage">
+    <ContentPage.Resources>
+    </ContentPage.Resources>
+        <AbsoluteLayout HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">                          
+            <!-- Main -->
+            
+            <Image AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All" Aspect="AspectFill"
+                   Source="{helpers:ImageResource Jwtauth.Images.Background}" />    
+            
+            <!-- Main End -->
+            
+            <FlexLayout AbsoluteLayout.LayoutBounds="0,0,1,1" 
+                        AbsoluteLayout.LayoutFlags="All"                   
+                        Direction="Column">
+                
+                <Image FlexLayout.Basis="30%"
+                       FlexLayout.AlignSelf="Center"
+                       Source="{helpers:ImageResource Jwtauth.Images.Icon}" />    
+                
+                 <FlexLayout FlexLayout.Grow="1">
+                 </FlexLayout> 
+            
+                <StackLayout Spacing="0" Padding="0,10,0,10" VerticalOptions="End" >
+
+
+                    <!-- Content -->
+                    <Entry x:Name="SecurityCode"
+                        Style="{StaticResource EntryPrimary}"                
+                        Margin="10,0,10,0"
+                        Keyboard="Numeric"
+                        Text="{Binding Path=UserViewModel.SecurityCode, Mode=TwoWay}"
+                        Placeholder="The emailed Security Code">
+                        <Entry.Behaviors>
+                            <validators:EntryValidatorBehavior
+                            IsCheckEmpty="True"
+                            IsCheckNumber="True"
+                            x:Name="SecurityCodeValidator" />
+                        </Entry.Behaviors>                                                     
+                    </Entry>
+
+                    <Label x:Name="SecurityCodeMessage" Style="{StaticResource LabelValidateFailMsg}"
+                            Text="{Binding Source={x:Reference SecurityCodeValidator}, Path=Message}"
+                            Opacity="{Binding Source={x:Reference SecurityCodeValidator}, Path=IsVisibleMessage}" />
+
+                    <Entry x:Name="EntryPassword"
+                            Style="{StaticResource EntryPrimary}"
+                            Margin="10,0,10,0"
+                            IsPassword="true"
+                            Text="{Binding Path=UserViewModel.Password, Mode=TwoWay}"
+                            Placeholder="Enter a password" >
+                        <Entry.Behaviors>
+                            <validators:EntryValidatorBehavior
+                            IsCheckEmpty="True"
+                            x:Name="PasswordValidator" />
+                        </Entry.Behaviors>                                                     
+                    </Entry>
+
+                    <Label x:Name="EntryPasswordMessage" Style="{StaticResource LabelValidateFailMsg}"
+                            Text="{Binding Source={x:Reference PasswordValidator}, Path=Message}"
+                            Opacity="{Binding Source={x:Reference PasswordValidator}, Path=IsVisibleMessage}" />
+
+                    <Entry x:Name="EntryPasswordConfirm"
+                            Style="{StaticResource EntryPrimary}"
+                            Margin="10,0,10,0"
+                            IsPassword="true"
+                            Text="{Binding Path=UserViewModel.PasswordConfirm, Mode=TwoWay}"
+                            Placeholder="Confirm password" >
+                        <Entry.Behaviors>
+                            <validators:EntryValidatorBehavior
+                            IsCheckEmpty="True"
+                            x:Name="EntryPasswordConfirmValidator" />
+                        </Entry.Behaviors>     
+                    </Entry>
+
+                    <Label x:Name="EntryPasswordConfirmMessage" Style="{StaticResource LabelValidateFailMsg}"
+                            Text="{Binding Source={x:Reference EntryPasswordConfirmValidator}, Path=Message}"
+                            Opacity="{Binding Source={x:Reference EntryPasswordConfirmValidator}, Path=IsVisibleMessage}" />
+
+                    <Button x:Name="ButtonOkay"
+                        Style="{StaticResource ButtonLargePrimary}"
+                        Text="Okay" />                    
+                    <Button x:Name="ButtonCancel"
+                        Style="{StaticResource ButtonLargePrimary}"
+                        Text="Cancel"/>        
+                
+                    <Label x:Name="ActivityLog" Text="{Binding Status}" Style="{StaticResource ProgressLog}" />                 
+                    <ProgressBar x:Name="ActiveIndicator" Progress="{Binding Progress}" 
+                                 Style="{StaticResource ProgressBarActive}" />
+                
+                </StackLayout>
+            </FlexLayout>      
+        </AbsoluteLayout>
+</views:JwtauthPage>
+
