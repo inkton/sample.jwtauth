@@ -18,10 +18,8 @@
         <Folder Include="wwwroot/" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="../../shared/nester.works/Nester.Works/Nester.Works.csproj" /> 
-    </ItemGroup>    
-    <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="Inkton.NesterWorks" Version="1.6.10" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="3.1.2" />
