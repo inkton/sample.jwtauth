@@ -81,7 +81,7 @@ namespace Jwtauth.Controllers
                 if (result.Succeeded)
                 {
                     await _userManager.AddClaimAsync(newTrader,
-                        new Claim("jwt.datej", newTrader.DateJoined.ToString()));
+                        new Claim(ClaimNames.Trader, newTrader.DateJoined.ToString()));
 
                     _logger.LogInformation("User created a new account with password.");
 
@@ -179,7 +179,6 @@ namespace Jwtauth.Controllers
         [HttpGet("{email}")]
         public async Task<JsonResult> RenewAccessAsync(string email)
         {
-            //var user = await _userManager.GetUserAsync(HttpContext.User);
             var user = await _userManager.FindByNameAsync(email);
 
             // A valid user emailed confirmed user must exist
