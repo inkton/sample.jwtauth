@@ -55,23 +55,35 @@ namespace Jwtauth.Controllers
         }
         
         // GET api/users/{id}
-        [Authorize(Policy = "AllTraders")] 
+        [AllowAnonymous]
         [HttpGet("{email}")]
-        public async Task<JsonResult> QueryAsync(string id)
+        public async Task<JsonResult> QueryAsync(string email)
         {
             try
             {
-                var user = await GetUserAsync(id);
+                var user = await _userManager.FindByEmailAsync(email);
 
                 if (user == null)
-                {
                     return this.NestResult(
-                        Result.Unauthorized); 
-                }
-                else
+                        Result.UserNotFound); 
+
+                if (await HasUserPermissionAsync(user))
                 {
                     return this.NestResultSingle(
                         Result.Succeeded, user);
+                }
+                else
+                {
+                    // An anonymous query to test whether 
+                    // email exits send minimal user information.
+                    var minimalUserInfo = new Trader
+                    { 
+                        Id = user.Id,
+                        Email = user.Email
+                    };
+
+                    return this.NestResultSingle(
+                        Result.Succeeded, minimalUserInfo);
                 }
             }
             catch (System.Exception e)
@@ -84,17 +96,24 @@ namespace Jwtauth.Controllers
         // PUT api/users/{id}
         [Authorize(Policy = "AllTraders")] 
         [HttpPut("{id}")]
-        public async Task<JsonResult> UpdateAsync(string id, 
+        public async Task<JsonResult> UpdateAsync(int id, 
             [FromQuery] string firstName,
             [FromQuery] string lastName)
         {
             try
             {
-                var user = await GetUserAsync(id);
+                var user = await _userManager.FindByIdAsync(id.ToString());
 
                 if (user == null)
                 {
-                    return this.NestResult(Result.Unauthorized); 
+                    return this.NestResult(
+                        Result.UserNotFound); 
+                }
+
+                if (!await HasUserPermissionAsync(user))
+                {
+                    return this.NestResult(
+                        Result.Unauthorized, "Inadequte permissions", 403); 
                 }
 
                 if (firstName != null)
@@ -125,7 +144,7 @@ namespace Jwtauth.Controllers
                     e.Message);
             }
         }
-
+/* 
         private async Task<Trader> GetUserAsync(string id)
         {
             Trader user = await _userManager.GetUserAsync(HttpContext.User);
@@ -148,6 +167,34 @@ namespace Jwtauth.Controllers
             }
 
             return user;
+        }
+*/
+        private async Task<bool> HasUserPermissionAsync(Trader user)
+        {
+            bool authorized = false;
+            var logginUser = await _userManager.GetUserAsync(@User);
+
+            if (logginUser != null)
+            {
+                if (logginUser.Id != user.Id)
+                {
+                    // only experienced traders can change other users
+                    var claims = await _userManager.GetClaimsAsync(logginUser);
+                    var dateJoinedRaw = claims.Where(c => c.Type == ClaimNames.Trader)
+                                .Select(c => c.Value).Single();
+                    if (dateJoinedRaw != null)
+                    {
+                        var dateJoined = DateTime.Parse(dateJoinedRaw);
+                        authorized = (DateTime.Now - dateJoined).TotalDays > (365 * 5);
+                    }
+                }
+                else
+                {
+                    authorized = true;
+                }
+            }
+
+            return authorized;
         }
     }
 }
