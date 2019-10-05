@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Inkton.Nest.Model;
-using Inkton.Nester;
 using Jwtauth.Config.Database;
 using Jwtauth.Model;
 

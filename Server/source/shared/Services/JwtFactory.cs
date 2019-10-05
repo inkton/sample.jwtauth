@@ -1,29 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
-using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-using Inkton.Nester;
-using Inkton.Nester.Queue;
-using Inkton.Nest.Cloud;
-using Inkton.Nest.Model;
-using Jwtauth.Database;
 using Jwtauth.Model;
 using Jwtauth.Config;
-using Jwtauth.Services;
 
 namespace Jwtauth.Services
 {

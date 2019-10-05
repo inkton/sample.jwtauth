@@ -1,9 +1,3 @@
-using System;
-using System.Text;
-using System.Threading.Tasks;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
-
 namespace Jwtauth.Config
 {
   public class JwtSettings

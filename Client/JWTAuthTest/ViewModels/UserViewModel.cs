@@ -1,10 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 using Inkton.Nester.Cloud;
 using Inkton.Nester.ViewModels;
 using Inkton.Nest.Cloud;
 using Inkton.Nest.Model;
 using Jwtauth.Model;
+using Newtonsoft.Json;
 
 namespace Jwtauth.ViewModels
 {
@@ -128,8 +130,41 @@ namespace Jwtauth.ViewModels
             return valid;
         }
 
+        async public Task SavePermitAsync()
+        {
+            Application.Current.Properties["Permit"] = JsonConvert.SerializeObject(
+                Backend.Permit);
+            await Application.Current.SavePropertiesAsync();
+        }
+
+        async public Task<bool> RestorePermitAsync()
+        {
+            bool restored = false;
+            _industryViewModel.Status = "Please wait ...";
+            if (Application.Current.Properties.ContainsKey("Permit"))
+            {
+                _backend.Permit = JsonConvert.DeserializeObject<Permit<Trader>>(
+                    Application.Current.Properties["Permit"] as string);
+
+                var result = await _industryViewModel.AuthViewModel.RenewTokenAsync(false);
+                if (result.Code >= 0)
+                {
+                    restored = true;
+                    await _industryViewModel.QueryIndustriesAsync();
+                }
+            }
+            return restored;
+        }
+
+        async public Task ResetPermitAsync()
+        {
+            Application.Current.Properties.Remove("Permit");
+            await Application.Current.SavePropertiesAsync();
+        }
+
         public async Task<ResultSingle<Permit<Trader>>> RegisterUserAsync(bool throwIfError = true)
         {
+            Backend.Permit.User.Id = 0;                  
             Backend.Permit.User.UserName =
                 Backend.Permit.User.Email;
 

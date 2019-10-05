@@ -17,6 +17,8 @@ namespace Jwtauth.Views
 
         public UserConfirmPage()
         {
+            SetBindingContext();
+
             InitializeComponent();
 
             _busyBundle.Items = new List<VisualElement>
@@ -130,13 +132,13 @@ namespace Jwtauth.Views
 
         private async Task CloseAsync()
         {
-            await _viewModel.SavePermitAsync();
+            await _viewModel.UserViewModel.SavePermitAsync();
 
             await _viewModel.QueryIndustriesAsync();
 
-            await CloseModalAsync();
+            await CancelModalStepsAsync();
 
-            AppShell.Current.FlyoutBehavior = FlyoutBehavior.Flyout;
+            await GoHomeAsync();
         }
 
         async Task DoPasswordChangeAsync()

@@ -1,9 +1,5 @@
-using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Collections.Generic;
-using Inkton.Nester;
-using Jwtauth;
 using Jwtauth.Model;
 
 namespace Jwtauth.Config.Database

@@ -16,6 +16,8 @@ namespace Jwtauth.Views
             _viewModel.Backend.Permit.User.DateJoined
                 = DateTime.Now;
 
+            SetBindingContext();
+
             InitializeComponent();
 
             _busyBundle.Items = new List<VisualElement>

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<views:JwtauthPage xmlns="http://xamarin.com/schemas/2014/forms" 
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+            xmlns:views="clr-namespace:Jwtauth.Views"
+            BackgroundColor="{StaticResource Accent}"
+            NavigationPage.HasNavigationBar="False"
+            x:Class="Jwtauth.Views.BootPage">
+    <ContentPage.Content>
+        <FlexLayout>
+            <Label Text="Please wait ..." FlexLayout.AlignSelf="Center"
+                   HorizontalTextAlignment="Center"
+                   Style="{StaticResource SectionHeaderLabel}"
+                   FlexLayout.Grow="1" />
+        </FlexLayout> 
+    </ContentPage.Content>
+</views:JwtauthPage>

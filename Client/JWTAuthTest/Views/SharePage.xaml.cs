@@ -12,6 +12,8 @@ namespace Jwtauth.Views
 
         public SharePage()
         {
+            SetBindingContext();
+
             InitializeComponent();
 
             _busyBundle.Items = new List<VisualElement> {

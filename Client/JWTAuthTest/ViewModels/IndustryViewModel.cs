@@ -153,38 +153,6 @@ namespace Jwtauth.ViewModels
             Status = $"Completed in {ms} ms";
         }
 
-        async public Task SavePermitAsync()
-        {
-            Application.Current.Properties["Permit"] = JsonConvert.SerializeObject(
-                Backend.Permit);
-            await Application.Current.SavePropertiesAsync();
-        }
-
-        async public Task<bool> RestorePermitAsync()
-        {
-            bool restored = false;
-            Status = "Please wait ...";
-            if (Application.Current.Properties.ContainsKey("Permit"))
-            {
-                _backend.Permit = JsonConvert.DeserializeObject<Permit<Trader>>(
-                    Application.Current.Properties["Permit"] as string);
-
-                var result = await AuthViewModel.RenewTokenAsync(false);
-                if (result.Code >= 0)
-                {
-                    restored = true;
-                    await QueryIndustriesAsync();
-                }
-            }
-            return restored;
-        }
-
-        async public Task ResetPermitAsync()
-        {
-            Application.Current.Properties.Remove("Permit");
-            await Application.Current.SavePropertiesAsync();
-        }
-
         public bool IsEmailValid()
         {
             if (string.IsNullOrEmpty(_authViewModel.Backend.Permit.User.Email))

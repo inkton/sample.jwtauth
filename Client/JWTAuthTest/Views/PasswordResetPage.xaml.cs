@@ -14,6 +14,8 @@ namespace Jwtauth.Views
     {
         public PasswordResetPage()
         {
+            SetBindingContext();
+
             InitializeComponent();
 
             _busyBundle = new ControlBundle(

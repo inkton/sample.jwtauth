@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -12,7 +13,7 @@ namespace Jwtauth.Views
 {
     public class JwtauthPage : ContentPage, IBackendServiceNotify
     {
-        protected IndustryViewModel _viewModel = IndustryViewModel.Current;
+        protected IndustryViewModel _viewModel;
         protected ControlBundle _busyBundle;
         protected bool _cancelRequest = false;
 
@@ -21,8 +22,20 @@ namespace Jwtauth.Views
 
         public JwtauthPage()
         {
+            _viewModel = IndustryViewModel.Current;
+
             _busyBundle = new ControlBundle(
                 new List<VisualElement> { });
+        }
+
+        protected void SetBindingContext(object context = null)
+        {
+            if (context != null)
+                BindingContext = context;
+            else
+                BindingContext = _viewModel;
+
+            _viewModel.Backend.Notifier = this;
         }
 
         async protected Task NextModalStepAsync(JwtauthPage page)
@@ -32,26 +45,37 @@ namespace Jwtauth.Views
             _returnedFromModalPage = true;
         }
 
-        async protected Task CloseModalAsync()
-        {
-            _nextModalPage = null;
-            await Navigation.PopModalAsync(false);
-        }
-
         async protected Task ScheduleNextModalStepAsync(JwtauthPage page)
         {
             _nextModalPage = page;
             await Navigation.PopModalAsync(false);
         }
 
+        async protected Task CancelModalStepsAsync()
+        {
+            _nextModalPage = null;
+            await Navigation.PopModalAsync(false);
+        }
+
+        async protected Task DoOnboardingAsync()
+        {
+            Shell.Current.FlyoutBehavior = FlyoutBehavior.Disabled;
+            await Shell.Current.GoToAsync("//Onboarding");
+        }
+
+        async protected Task GoHomeAsync()
+        {
+            _viewModel.UserViewModel.Password = string.Empty;
+            _viewModel.UserViewModel.PasswordConfirm = string.Empty;
+
+            Shell.Current.FlyoutBehavior = FlyoutBehavior.Flyout;
+            Shell.Current.FlyoutIsPresented = false;
+            await Shell.Current.GoToAsync("//Home");
+        }
+
         async protected override void OnAppearing()
         {
             base.OnAppearing();
-
-            _viewModel = IndustryViewModel.Current;
-            _viewModel.Backend.Notifier = this;
-
-            BindingContext = _viewModel;
 
             if (_returnedFromModalPage)
             {
@@ -59,10 +83,8 @@ namespace Jwtauth.Views
 
                 if (_nextModalPage == null)
                 {
-                    Shell.Current.FlyoutBehavior = FlyoutBehavior.Flyout;
-                    Shell.Current.FlyoutIsPresented = false;
-
-                    await Navigation.PopModalAsync();
+                    if (Navigation.ModalStack.Any())
+                        await Navigation.PopModalAsync();
                 }
                 else
                 {

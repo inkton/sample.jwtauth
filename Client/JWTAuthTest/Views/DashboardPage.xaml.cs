@@ -9,6 +9,8 @@ namespace Jwtauth.Views
     {
         public DashboardPage()
         {
+            SetBindingContext();
+
             InitializeComponent();
 
             _busyBundle.Items = new List<VisualElement> {

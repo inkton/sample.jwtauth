@@ -1,6 +1,4 @@
 using System;
-using System.Text;
-using System.Linq;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Jwtauth.Database;
 using Jwtauth.Model;
-using Jwtauth.Helpers;
 using Jwtauth.Services;
 using Jwtauth.Config;
 

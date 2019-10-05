@@ -1,28 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IdentityModel.Tokens.Jwt;
-using System.Diagnostics;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Inkton.Nester;
-using Inkton.Nester.Queue;
-using Inkton.Nest.Cloud;
 using Inkton.Nest.Model;
-using Jwtauth.Database;
 using Jwtauth.Model;
 using Jwtauth.Services;
 using Jwtauth.Helpers;
@@ -31,28 +18,23 @@ namespace Jwtauth.Controllers
 {
     [ApiController]
     [Route("api/permits")]
-    public class PermitsController : Controller
+    public class PermitsController : JwtauthBaseController
     {
-        private readonly ILogger _logger;
-        private readonly IIndustryRepository _repo;
         private readonly SignInManager<Trader> _signInManager;
-        private readonly UserManager<Trader> _userManager;
         private readonly IEmailSender _emailSender;
         private readonly IJwtFactory _jwtFactory;
 
         public PermitsController(
+            NesterServices nesterServices,
             ILogger<PermitsController> logger,
-            IIndustryRepository repo,            
+            IIndustryRepository repo,
+            UserManager<Trader> userManager,          
             SignInManager<Trader> signInManager,
-            UserManager<Trader> userManager,
             IEmailSender emailSender,
-            IJwtFactory jwtFactory
-            )
+            IJwtFactory jwtFactory) 
+            : base(nesterServices, logger, repo, userManager)
         {
-            _logger = logger;
-            _repo = repo;           
             _signInManager = signInManager;
-            _userManager = userManager;
             _emailSender = emailSender;
             _jwtFactory = jwtFactory;  
         }
@@ -68,29 +50,37 @@ namespace Jwtauth.Controllers
                 if (string.IsNullOrWhiteSpace(password))
                     return this.NestResult(Result.PasswordRequired);
 
-                // create user and confirm email via a security code
-                Trader newTrader = new Trader();
-                newTrader.FirstName = permit.User.FirstName;
-                newTrader.LastName = permit.User.LastName;
-                newTrader.Email = permit.User.Email;
-                newTrader.UserName = permit.User.UserName;
-                newTrader.DateJoined = permit.User.DateJoined;
+                var existingUser = await _userManager.FindByNameAsync(permit.User.Email);
 
-                var result = await _userManager.CreateAsync(newTrader, password);
+                // If the email still hasn't been confirmed - request another
+                if (existingUser != null && existingUser.AccessFailedCount < MaxFailedCount
+                    && !await _userManager.IsEmailConfirmedAsync(existingUser))
+                {
+                    await RequestEmailConfirmationAsync(existingUser);
+
+                    await _userManager.AccessFailedAsync(existingUser);
+
+                    return this.NestResultSingle(
+                        Result.Succeeded, permit);
+                }
+
+                var result = await _userManager.CreateAsync(permit.User, password);
 
                 if (result.Succeeded)
                 {
-                    await _userManager.AddClaimAsync(newTrader,
-                        new Claim(ClaimNames.Trader, newTrader.DateJoined.ToString()));
+                    await _userManager.AddClaimAsync(permit.User,
+                        new Claim(ClaimNames.Trader, permit.User.DateJoined.ToString()));
 
                     _logger.LogInformation("User created a new account with password.");
 
-                    await RequestEmailConfirmationAsync(newTrader);
+                    await RequestEmailConfirmationAsync(permit.User);
 
-                    // Copy the database assigned id
-                    permit.User.Id = newTrader.Id;
+                    // Update the user and return 
+                    // --------------------------
+                    // NOTE: The user object in the permit does have a password hash that should 
+                    // not be exposed to the untrusted client. The framework makes sure the 
+                    // hash is not copied to the client.
 
-                    // Update the user and return                        
                     return this.NestResultSingle(
                         Result.Succeeded, permit); 
                 }
@@ -179,11 +169,27 @@ namespace Jwtauth.Controllers
         [HttpGet("{email}")]
         public async Task<JsonResult> RenewAccessAsync(string email)
         {
-            var user = await _userManager.FindByNameAsync(email);
+            // Here 'AllTraders' are allowed access here. 
+            // Although an ordinary trader should not
+            // be able to renew access of another trader
+            // using their email address. GetAuthorizedUserAsync 
+            // returns the operating user only if the user has
+            // the authority to impersonate another trader.
 
-            // A valid user emailed confirmed user must exist
-            if (user == null || email != user.Email || !(await _userManager.IsEmailConfirmedAsync(user)))
-                return this.NestResult(Result.Failed); 
+            var user = await GetAuthorizedUserAsync(email);
+
+            if (user == null)
+                return this.NestResult(
+                    Result.Unauthorized, 
+                    "Cannot update user", 401);
+
+
+            var renewedPermit = new Permit<Trader>();
+            // --------------------------
+            // NOTE: The user object in the permit does have a password hash that should 
+            // not be exposed to the untrusted client. The framework makes sure the 
+            // hash is not copied to the client.
+            renewedPermit.User = user;
 
             var savedToken = await _userManager.GetAuthenticationTokenAsync(
                 user, "JWTSample", "RefreshToken");
@@ -194,8 +200,6 @@ namespace Jwtauth.Controllers
             if (savedToken != receivedToken)
                 return this.NestResult(Result.Failed); 
 
-            var renewedPermit = new Permit<Trader>();
-            SafeCopy(user, renewedPermit.User);
             renewedPermit.RefreshToken = savedToken;
             renewedPermit.AccessToken = _jwtFactory.Create(user,
                     await _userManager.GetClaimsAsync(user));
@@ -205,21 +209,26 @@ namespace Jwtauth.Controllers
         }
 
         // DELETE api/permits/{email}
-        [Authorize(Policy = "TraderManagers")] 
+        [Authorize(Policy = "AllTraders")] 
         [HttpDelete("{email}")]
-        public async Task<JsonResult> RevokeAccessAsync(string email)
-        {
-            if (string.IsNullOrEmpty(email))
-                return this.NestResult(Result.IncorrectEmail); 
-
-            var user = await _userManager.FindByNameAsync(email);
+        public async Task<JsonResult> RevokeAccessAsync(string email,
+            Permit<Trader> permit)
+        {            
+            var user = await GetAuthorizedUserAsync(email);
 
             if (user == null)
-                return this.NestResult(Result.UserNotFound); 
+                return this.NestResult(
+                    Result.Unauthorized, 
+                    "Cannot update user", 401);
 
-            await _userManager.RemoveAuthenticationTokenAsync(user, "JWTSample", "RefreshToken");
+            await _userManager.RemoveAuthenticationTokenAsync(
+                user, "JWTSample", "RefreshToken");
             
-            return this.NestResult(Result.Succeeded);
+            permit.RefreshToken = null;
+            permit.AccessToken = null;
+
+            return this.NestResultSingle(
+                Result.Succeeded, permit);
         }
 
         async private Task<JsonResult> CreatePermitAsync(Trader user, string password,
@@ -244,7 +253,11 @@ namespace Jwtauth.Controllers
             
             if (result.Succeeded)
             {
-                SafeCopy(user, permit.User);
+                // --------------------------
+                // NOTE: The user object in the permit does have a password hash that should 
+                // not be exposed to the untrusted client. The framework makes sure the 
+                // hash is not copied to the client.
+                permit.User = user;
                 return await CreateTokensAsync(user, permit);
             }
             else
@@ -286,17 +299,6 @@ namespace Jwtauth.Controllers
                 user, securityCode);
 
             return (result.Succeeded);
-        }
-
-        private void SafeCopy(Trader from, Trader to)
-        {
-            // Send back the non-security
-            // sensitive properties 
-            to.Id = from.Id;
-            to.Email = from.Email;
-            to.FirstName = from.FirstName;
-            to.LastName = from.LastName;
-            to.DateJoined = from.DateJoined;
         }
     }
 }

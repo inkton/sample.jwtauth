@@ -11,6 +11,8 @@ namespace Jwtauth.Views
     {
         public OnboardingPage()
         {
+            SetBindingContext();
+
             InitializeComponent();
 
             _busyBundle.Items = new List<VisualElement> {

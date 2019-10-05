@@ -1,7 +1,5 @@
-using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
 using Jwtauth.Model;
 
 namespace Jwtauth.Services

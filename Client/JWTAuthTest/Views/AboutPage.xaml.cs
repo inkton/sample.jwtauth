@@ -4,6 +4,8 @@
     {
         public AboutPage()
         {
+            SetBindingContext();
+
             InitializeComponent();
         }
     }

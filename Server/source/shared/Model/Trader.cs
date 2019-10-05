@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Inkton.Nest.Cloud;
 using Inkton.Nest.Model;

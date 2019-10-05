@@ -16,15 +16,21 @@
     </ItemGroup>
     <ItemGroup>
         <Folder Include="wwwroot/" />
+    </ItemGroup>    
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.App">
+          <PrivateAssets Condition="'%(PackageReference.Version)' == ''">all</PrivateAssets>
+          <Publish Condition="'%(PackageReference.Version)' == ''">true</Publish>
+        </PackageReference>
+        <!-- <PackageReference Include="Inkton.NesterWorks" Version="1.6.10" /> -->
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.App" />
-        <PackageReference Include="Inkton.NesterWorks" Version="1.6.10" />
+        <ProjectReference Include="../../shared/nester.works/Nester.Works/Nester.Works.csproj" /> 
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="3.1.2" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc2"/>
-        <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="5.0.0-rc8"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc2" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="5.0.0-rc8" />
         <PackageReference Include="SendGrid" Version="9.10.0" />
     </ItemGroup>
     <ItemGroup>

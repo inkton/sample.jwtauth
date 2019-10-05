@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 using Inkton.Nester;
-using Inkton.Nester.Queue;
-using Inkton.Nest.Cloud;
-using Inkton.Nest.Model;
-using Jwtauth.Database;
 using Jwtauth.Model;
 using Jwtauth.Services;
 using Jwtauth.Helpers;
@@ -20,21 +12,15 @@ namespace Jwtauth.Controllers
 {
     [ApiController]
     [Route("api/industries")]
-    public class IndustriesController : ControllerBase
+    public class IndustriesController : JwtauthBaseController
     {
-        private readonly ILogger _logger;
-        private readonly IIndustryRepository _repo;
-        private readonly NesterServices _runtime;
-
         public IndustriesController(
+            NesterServices nesterServices,
             ILogger<IndustriesController> logger,
             IIndustryRepository repo,
-            NesterServices runtime)
-        {
-            _logger = logger;
-            _repo = repo;
-            _runtime = runtime;
-        }
+            UserManager<Trader> userManager)
+            : base(nesterServices, logger, repo, userManager)
+        { }
 
         [HttpGet]
         [Authorize(Policy = "SkilledTraders")] 

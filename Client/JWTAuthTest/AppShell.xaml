@@ -36,6 +36,14 @@
         </DataTemplate>
     </Shell.FlyoutHeaderTemplate>
 
+    <ShellItem Route="Bootstrap">
+        <ShellContent ContentTemplate="{DataTemplate local:BootPage}" />
+    </ShellItem>
+
+    <ShellItem Route="Onboarding">
+        <ShellContent ContentTemplate="{DataTemplate local:OnboardingPage}" />
+    </ShellItem>
+
     <!-- Your Pages -->
     <FlyoutItem Title="Home"
                 Route="Home"                
